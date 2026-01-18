@@ -71,6 +71,7 @@ jobs:
         with:
           node-version: '20'  # or whatever version you're using locally
           cache: 'npm'        # caches node_modules for faster CI
+          cache-dependency-path: 'package-lock.json'
 
       - name: Checkout code
         uses: actions/checkout@v4
