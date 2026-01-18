@@ -66,6 +66,12 @@ jobs:
       - name: Install packages
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config google-chrome-stable
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'  # or whatever version you're using locally
+          cache: 'npm'        # caches node_modules for faster CI
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -74,6 +80,9 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+
+      - name: Install Node dependencies
+        run: npm ci
 
       - name: Run tests
         env:
