@@ -66,22 +66,23 @@ jobs:
       - name: Install packages
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config google-chrome-stable
 
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
-          node-version: '20'  # or whatever version you're using locally
-          cache-dependency-path: 'package-lock.json'
-      - run: npm ci
-          # cache: 'npm'         caches node_modules for faster CI
-
-      - name: Checkout code
-        uses: actions/checkout@v4
+          node-version: '20'
+          cache: 'npm'
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+        
+      - name: Install npm packages
+        run: npm ci
 
       - name: Run tests
         env:
