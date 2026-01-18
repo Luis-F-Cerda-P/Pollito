@@ -7,3 +7,6 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+User.find_or_create_by!(email_address: Rails.application.credentials.dig("seed_user", "email_address")) do |user|
+  user.password = Rails.application.credentials.dig("seed_user", "password")
+end
