@@ -1,10 +1,10 @@
 # AGENTS.md
 
-This file contains guidelines and commands for AI agents working in the Pollia Rails application.
+This file contains guidelines and commands for AI agents working in the Pollito Rails application.
 
 ## Project Overview
 
-Pollia is a **Ruby on Rails 8.0.3** application using:
+Pollito is a **Ruby on Rails 8.0.3** application using:
 - Ruby 3.3.5 with PostgreSQL database
 - Hotwire (Turbo + Stimulus) for frontend interactivity
 - Tailwind CSS for styling with Import Maps for JavaScript
