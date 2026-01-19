@@ -2,8 +2,10 @@
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold text-gray-900">Match Details</h1>
     <div class="flex space-x-3">
-      <%= link_to "Edit", edit_match_path(@match), 
-          class: "bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+      <% if Current.user&.admin? %>
+        <%= link_to "Edit", edit_match_path(@match), 
+            class: "bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+      <% end %>
       <%= link_to "Back to Matches", matches_path, 
           class: "bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
     </div>

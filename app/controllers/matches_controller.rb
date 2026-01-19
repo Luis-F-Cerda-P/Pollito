@@ -1,5 +1,6 @@
 class MatchesController < ApplicationController
   before_action :set_match, only: [ :show, :edit, :update, :destroy ]
+  before_action :require_admin!, only: [ :new, :create, :edit, :update, :destroy ]
 
   def index
     @matches = Match.includes(:event, :team1, :team2).order(:match_date)

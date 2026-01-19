@@ -1,6 +1,6 @@
 class BettingPoolsController < ApplicationController
   before_action :set_betting_pool, only: [ :show, :edit, :update, :destroy ]
-  before_action :require_authentication, only: [ :create, :update, :destroy ]
+  before_action :require_authentication
 
   def index
     @betting_pools = BettingPool.includes(:event, :creator).all

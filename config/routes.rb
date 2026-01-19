@@ -5,6 +5,7 @@ Rails.application.routes.draw do
 
   resources :teams
   resources :events
+  # TODO: The matches resource should be nested inside events
   resources :matches
   resources :betting_pools do
     member do
