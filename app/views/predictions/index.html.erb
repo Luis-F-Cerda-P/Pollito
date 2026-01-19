@@ -1,0 +1,80 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">My Predictions</h1>
+    <%= link_to "New Prediction", new_prediction_path, 
+        class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+  </div>
+  <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Betting Pool</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Your Prediction</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actual Score</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match Date</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @predictions.each do |prediction| %>
+            <tr class="hover:bg-gray-50 transition-colors duration-150">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <%= link_to prediction.betting_pool.name, prediction.betting_pool, 
+                    class: "text-blue-600 hover:text-blue-800 font-medium text-sm" %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm">
+                  <div class="font-medium text-gray-900">
+                    <%= prediction.match.team1&.name || "TBD" %> vs <%= prediction.match.team2&.name || "TBD" %>
+                  </div>
+                  <div class="text-gray-500"><%= prediction.match.event.name %></div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <%= prediction.predicted_score1 %> - <%= prediction.predicted_score2 %>
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% if prediction.match.score1.present? && prediction.match.score2.present? %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <%= prediction.match.score1 %> - <%= prediction.match.score2 %>
+                  </span>
+                <% else %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    Not played
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <div><%= prediction.match.match_date.strftime("%b %d, %Y") %></div>
+                <div class="text-gray-500"><%= prediction.match.match_date.strftime("%H:%M") %></div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <% if prediction.match.score1.blank? && prediction.match.score2.blank? %>
+                  <%= link_to "Edit", edit_prediction_path(prediction), 
+                      class: "text-indigo-600 hover:text-indigo-900 mr-3" %>
+                  <%= link_to "Delete", prediction, method: :delete, 
+                      data: { confirm: "Are you sure you want to delete this prediction?" },
+                      class: "text-red-600 hover:text-red-900" %>
+                <% else %>
+                  <span class="text-gray-400">Match completed</span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <% if @predictions.empty? %>
+    <div class="text-center py-12">
+      <div class="text-gray-500 text-lg mb-4">No predictions found</div>
+      <p class="text-gray-600 mb-6">Join a betting pool and start making predictions!</p>
+      <%= link_to "Make Your First Prediction", new_prediction_path, 
+          class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+    </div>
+  <% end %>
+</div>

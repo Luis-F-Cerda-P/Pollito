@@ -1,0 +1,100 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">New Match</h1>
+    <%= link_to "Back to Matches", matches_path, 
+        class: "bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+  </div>
+  <div class="bg-white shadow-md rounded-lg">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">Match Information</h2>
+    </div>
+    <div class="p-6">
+      <%= form_with(model: @match, local: true, class: "space-y-6") do |form| %>
+        <% if @match.errors.any? %>
+          <div class="bg-red-50 border border-red-200 rounded-md p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">
+                  <%= pluralize(@match.errors.count, "error") %> prohibited this match from being saved:
+                </h3>
+                <div class="mt-2 text-sm text-red-700">
+                  <ul class="list-disc list-inside">
+                    <% @match.errors.full_messages.each do |message| %>
+                      <li><%= message %></li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <%= form.label :event_id, class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.select :event_id, 
+                options_from_collection_for_select(@events, :id, :name, @match.event_id),
+                { prompt: "Select an event" },
+                { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
+          </div>
+          <div>
+            <%= form.label :round, class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.number_field :round, 
+                class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+                placeholder: "Round number (optional)" %>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <%= form.label :team1_id, class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.select :team1_id, 
+                options_from_collection_for_select(@teams, :id, :name, @match.team1_id),
+                { prompt: "Select first team" },
+                { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
+          </div>
+          <div>
+            <%= form.label :team2_id, class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.select :team2_id, 
+                options_from_collection_for_select(@teams, :id, :name, @match.team2_id),
+                { prompt: "Select second team" },
+                { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
+          </div>
+        </div>
+        <div>
+          <%= form.label :match_date, class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.datetime_local_field :match_date, 
+              class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
+        </div>
+        <div class="border-t border-gray-200 pt-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Match Result (leave blank if not played yet)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <%= form.label :score1, class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.number_field :score1, 
+                  class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+                  placeholder: "Team 1 score",
+                  min: 0 %>
+            </div>
+            <div>
+              <%= form.label :score2, class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.number_field :score2, 
+                  class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+                  placeholder: "Team 2 score",
+                  min: 0 %>
+            </div>
+          </div>
+        </div>
+        <div class="flex justify-end space-x-3">
+          <%= link_to "Cancel", matches_path, 
+              class: "bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+          <%= form.submit "Create Match", 
+              class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

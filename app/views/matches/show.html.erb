@@ -1,0 +1,105 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Match Details</h1>
+    <div class="flex space-x-3">
+      <%= link_to "Edit", edit_match_path(@match), 
+          class: "bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+      <%= link_to "Back to Matches", matches_path, 
+          class: "bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2">
+      <div class="bg-white shadow-md rounded-lg mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-900">Match Information</h2>
+        </div>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div class="text-center flex-1">
+              <div class="text-2xl font-bold text-gray-900 mb-2">
+                <%= @match.team1&.name || "TBD" %>
+              </div>
+              <% if @match.team1.present? %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  <%= @match.team1.country_code.upcase %>
+                </span>
+              <% end %>
+            </div>
+            <div class="px-8 text-center">
+              <div class="text-3xl font-bold text-gray-900">
+                <% if @match.score1.present? && @match.score2.present? %>
+                  <%= @match.score1 %> - <%= @match.score2 %>
+                <% else %>
+                  vs
+                <% end %>
+              </div>
+              <div class="text-sm text-gray-500 mt-1">
+                <% if @match.round.present? %>Round <%= @match.round %><% end %>
+              </div>
+            </div>
+            <div class="text-center flex-1">
+              <div class="text-2xl font-bold text-gray-900 mb-2">
+                <%= @match.team2&.name || "TBD" %>
+              </div>
+              <% if @match.team2.present? %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  <%= @match.team2.country_code.upcase %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Event</h3>
+              <p class="text-lg text-gray-900">
+                <%= link_to @match.event.name, @match.event, class: "text-blue-600 hover:text-blue-800" %>
+              </p>
+            </div>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Date & Time</h3>
+              <p class="text-lg text-gray-900">
+                <%= @match.match_date.strftime("%B %d, %Y at %H:%M") %>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="lg:col-span-1">
+      <% if @match.predictions.any? %>
+        <div class="bg-white shadow-md rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">Predictions (<%= @match.predictions.count %>)</h2>
+          </div>
+          <div class="p-6">
+            <div class="space-y-3">
+              <% @match.predictions.includes(:user).each do |prediction| %>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div class="font-medium text-gray-900"><%= prediction.user.email_address %></div>
+                    <div class="text-sm text-gray-600">
+                      <%= prediction.predicted_score1 %> - <%= prediction.predicted_score2 %>
+                    </div>
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    <%= prediction.created_at.strftime("%b %d") %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <div class="bg-white shadow-md rounded-lg">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">Predictions</h2>
+          </div>
+          <div class="p-6 text-center text-gray-500">
+            No predictions yet for this match
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

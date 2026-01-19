@@ -23,4 +23,8 @@ class User < ApplicationRecord
   def prediction_for_match(match, pool)
     predictions.find_by(match: match, betting_pool: pool)
   end
+
+  def betting_pools
+    BettingPool.where("creator_id = ? OR id IN (SELECT betting_pool_id FROM betting_pool_memberships WHERE user_id = ?)", id, id)
+  end
 end

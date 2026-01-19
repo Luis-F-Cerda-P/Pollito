@@ -2,6 +2,19 @@ Rails.application.routes.draw do
   get "pages/home"
   resource :session
   resources :passwords, param: :token
+
+  resources :teams
+  resources :events
+  resources :matches
+  resources :betting_pools do
+    member do
+      post :join
+      post :leave
+      get :matches
+    end
+  end
+  resources :predictions
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

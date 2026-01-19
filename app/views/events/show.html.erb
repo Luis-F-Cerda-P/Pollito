@@ -1,0 +1,88 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900"><%= @event.name %></h1>
+    <div class="flex space-x-3">
+      <%= link_to "Edit", edit_event_path(@event), 
+          class: "bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+      <%= link_to "Back to Events", events_path, 
+          class: "bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
+    </div>
+  </div>
+  <div class="bg-white shadow-md rounded-lg mb-8">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">Event Details</h2>
+    </div>
+    <div class="p-6">
+      <% if @event.description.present? %>
+        <div class="mb-6">
+          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Description</h3>
+          <p class="text-gray-700"><%= @event.description %></p>
+        </div>
+      <% end %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <% if @event.start_date.present? %>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Start Date</h3>
+            <p class="text-lg text-gray-900"><%= @event.start_date.strftime("%B %d, %Y") %></p>
+          </div>
+        <% end %>
+        <% if @event.end_date.present? %>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">End Date</h3>
+            <p class="text-lg text-gray-900"><%= @event.end_date.strftime("%B %d, %Y") %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <% if @event.matches.any? %>
+    <div class="bg-white shadow-md rounded-lg mb-8">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Matches (<%= @event.matches.count %>)</h2>
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <% @event.matches.order(:match_date).each do |match| %>
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-150">
+              <div class="flex items-center space-x-4">
+                <span class="font-medium text-gray-900"><%= match.team1&.name || "TBD" %></span>
+                <span class="text-gray-500">vs</span>
+                <span class="font-medium text-gray-900"><%= match.team2&.name || "TBD" %></span>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-medium text-gray-900">
+                  <%= match.match_date.strftime("%b %d, %Y") %>
+                </div>
+                <div class="text-sm text-gray-600">
+                  <%= match.match_date.strftime("%H:%M") %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  <% if @event.betting_pools.any? %>
+    <div class="bg-white shadow-md rounded-lg">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-900">Betting Pools (<%= @event.betting_pools.count %>)</h2>
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <% @event.betting_pools.each do |pool| %>
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div>
+                <h4 class="font-medium text-gray-900"><%= pool.name %></h4>
+                <p class="text-sm text-gray-600">Created by <%= pool.creator.email_address %></p>
+              </div>
+              <div class="text-sm text-gray-500">
+                <%= pool.betting_pool_memberships.count %> members
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

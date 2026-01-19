@@ -34,6 +34,10 @@ class Match < ApplicationRecord
     team2
   end
 
+  def match_display_name
+    "#{team1&.name || 'TBD'} vs #{team2&.name || 'TBD'} - #{event.name}"
+  end
+
   private
 
   def teams_must_be_different
