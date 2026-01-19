@@ -13,7 +13,12 @@ Rails.application.routes.draw do
       get :matches
     end
   end
-  resources :predictions
+resources :predictions
+
+  namespace :admin do
+    root to: "dashboard#index"
+    resources :users, only: [ :index, :edit, :update ]
+  end
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
