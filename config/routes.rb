@@ -2,11 +2,11 @@ Rails.application.routes.draw do
   get "pages/home"
   resource :session
   resources :passwords, param: :token
+  resources :participants
 
-  resources :teams
-  resources :events
-  # TODO: The matches resource should be nested inside events
   resources :matches
+  resources :events
+
   resources :betting_pools do
     member do
       post :join
@@ -14,7 +14,7 @@ Rails.application.routes.draw do
       get :matches
     end
   end
-resources :predictions
+ resources :predictions
 
   namespace :admin do
     root to: "dashboard#index"
