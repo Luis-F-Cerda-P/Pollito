@@ -10,7 +10,35 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_18_174954) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_21_030203) do
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
   create_table "betting_pool_memberships", force: :cascade do |t|
     t.bigint "betting_pool_id", null: false
     t.datetime "created_at", null: false
@@ -44,20 +72,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_18_174954) do
     t.index ["name"], name: "index_events_on_name", unique: true
   end
 
+  create_table "match_participants", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "match_id", null: false
+    t.integer "participant_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["match_id"], name: "index_match_participants_on_match_id"
+    t.index ["participant_id"], name: "index_match_participants_on_participant_id"
+  end
+
   create_table "matches", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "event_id", null: false
-    t.datetime "match_date", null: false
+    t.datetime "match_date"
+    t.integer "match_status"
     t.integer "round"
-    t.integer "score1"
-    t.integer "score2"
-    t.bigint "team1_id"
-    t.bigint "team2_id"
     t.datetime "updated_at", null: false
     t.index ["event_id", "match_date"], name: "index_matches_on_event_id_and_match_date"
     t.index ["event_id"], name: "index_matches_on_event_id"
-    t.index ["team1_id"], name: "index_matches_on_team1_id"
-    t.index ["team2_id"], name: "index_matches_on_team2_id"
+  end
+
+  create_table "participants", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_participants_on_name", unique: true
   end
 
   create_table "predictions", force: :cascade do |t|
@@ -83,15 +122,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_18_174954) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
-  create_table "teams", force: :cascade do |t|
-    t.string "country_code", null: false
-    t.datetime "created_at", null: false
-    t.string "name", null: false
-    t.datetime "updated_at", null: false
-    t.index ["country_code"], name: "index_teams_on_country_code", unique: true
-    t.index ["name"], name: "index_teams_on_name", unique: true
-  end
-
   create_table "users", force: :cascade do |t|
     t.boolean "admin", default: false, null: false
     t.datetime "created_at", null: false
@@ -101,13 +131,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_18_174954) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "betting_pool_memberships", "betting_pools"
   add_foreign_key "betting_pool_memberships", "users"
   add_foreign_key "betting_pools", "events"
   add_foreign_key "betting_pools", "users", column: "creator_id"
+  add_foreign_key "match_participants", "matches"
+  add_foreign_key "match_participants", "participants"
   add_foreign_key "matches", "events"
-  add_foreign_key "matches", "teams", column: "team1_id"
-  add_foreign_key "matches", "teams", column: "team2_id"
   add_foreign_key "predictions", "betting_pools"
   add_foreign_key "predictions", "matches"
   add_foreign_key "predictions", "users"
