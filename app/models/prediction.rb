@@ -3,6 +3,8 @@ class Prediction < ApplicationRecord
   belongs_to :match
   belongs_to :user
 
+  has_many :predicted_results, dependent: :destroy
+
   validates :predicted_score1, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :predicted_score2, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :user_id, uniqueness: { scope: [ :betting_pool_id, :match_id ], message: "already made a prediction for this match in this pool" }
