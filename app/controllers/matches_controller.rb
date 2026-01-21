@@ -3,7 +3,7 @@ class MatchesController < ApplicationController
   before_action :require_admin!, only: [ :new, :create, :edit, :update, :destroy ]
 
   def index
-    @matches = Match.includes(:event, :team1, :team2).order(:match_date)
+    @matches = Match.includes(:event, :participants).order(:match_date)
   end
 
   def show
@@ -12,7 +12,7 @@ class MatchesController < ApplicationController
   def new
     @match = Match.new
     @events = Event.all
-    @teams = Team.all
+    @participants = Participant.all
   end
 
   def create
@@ -22,14 +22,14 @@ class MatchesController < ApplicationController
       redirect_to @match, notice: "Match was successfully created."
     else
       @events = Event.all
-      @teams = Team.all
+      @participants = Participant.all
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
     @events = Event.all
-    @teams = Team.all
+    @participants = Participant.all
   end
 
   def update
@@ -37,7 +37,7 @@ class MatchesController < ApplicationController
       redirect_to @match, notice: "Match was successfully updated."
     else
       @events = Event.all
-      @teams = Team.all
+      @participants = Participant.all
       render :edit, status: :unprocessable_entity
     end
   end
@@ -50,10 +50,10 @@ class MatchesController < ApplicationController
   private
 
   def set_match
-    @match = Match.includes(:event, :team1, :team2).find(params[:id])
+    @match = Match.includes(:event, :participants).find(params[:id])
   end
 
   def match_params
-    params.require(:match).permit(:event_id, :team1_id, :team2_id, :score1, :score2, :match_date, :round)
+    params.require(:match).permit(:event_id, :match_date, :round)
   end
 end
