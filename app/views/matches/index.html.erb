@@ -27,21 +27,15 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center space-x-2">
-                  <span class="font-medium"><%= match.team1&.name || "TBD" %></span>
+                  <span class="font-medium"><%= match.participants.first&.name || "TBD" %></span>
                   <span class="text-gray-500">vs</span>
-                  <span class="font-medium"><%= match.team2&.name || "TBD" %></span>
+                  <span class="font-medium"><%= match.participants.last&.name || "TBD" %></span>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <% if match.score1.present? && match.score2.present? %>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    <%= match.score1 %> - <%= match.score2 %>
-                  </span>
-                <% else %>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                    Not played
-                  </span>
-                <% end %>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  Not played
+                </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <div><%= match.match_date.strftime("%b %d, %Y") %></div>
@@ -62,9 +56,12 @@
                 <% if Current.user&.admin? %>
                   <%= link_to "Edit", edit_match_path(match), 
                       class: "text-indigo-600 hover:text-indigo-900 mr-3" %>
-                  <%= link_to "Delete", match, method: :delete, 
-                      data: { confirm: "Are you sure you want to delete this match?" },
-                      class: "text-red-600 hover:text-red-900" %>
+                  <%= link_to "Delete", match, 
+                    data: { 
+                      turbo_method: :delete,
+                      turbo_confirm: "Are you sure you want to delete this match?" 
+                    },
+                    class: "text-red-600 hover:text-red-900" %>
                 <% end %>
               </td>
             </tr>
