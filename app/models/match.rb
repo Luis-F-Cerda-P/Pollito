@@ -1,8 +1,10 @@
 class Match < ApplicationRecord
   belongs_to :event
 
-  has_many :match_participants
+  has_many :match_participants, dependent: :destroy
   has_many :participants, through: :match_participants
+  has_many :results, through: :match_participants
+
   has_many :predictions, dependent: :destroy
 
   has_one_attached :image

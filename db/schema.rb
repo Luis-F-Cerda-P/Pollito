@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_21_030203) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_21_205120) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -113,6 +113,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_030203) do
     t.index ["user_id"], name: "index_predictions_on_user_id"
   end
 
+  create_table "results", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "final", default: false, null: false
+    t.integer "match_participant_id", null: false
+    t.integer "score"
+    t.datetime "updated_at", null: false
+    t.index ["match_participant_id"], name: "index_results_on_match_participant_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "ip_address"
@@ -143,5 +152,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_030203) do
   add_foreign_key "predictions", "betting_pools"
   add_foreign_key "predictions", "matches"
   add_foreign_key "predictions", "users"
+  add_foreign_key "results", "match_participants"
   add_foreign_key "sessions", "users"
 end

@@ -7,6 +7,7 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+print "Seeding primary database"
 User.find_or_create_by!(email_address: Rails.application.credentials.dig("seed_user", "email_address")) do |user|
   user.password = Rails.application.credentials.dig("seed_user", "password")
   user.admin = true
@@ -19,14 +20,26 @@ event = Event.find_or_create_by!(name: "Fifa world Cup") do |event|
   event.start_date = the_time
   event.end_date = the_time
 end
+print "."
 
 participants = [ "France", "Argentina" ].map do |country|
   Participant.find_or_create_by!(name: country)
 end
+print "."
 
-Match.find_or_create_by!(id: 1) do |match|
+match = Match.find_or_create_by!(id: 1) do |match|
   match.match_date = the_time
   match.round = 1
   match.event = event
   match.participants = participants
 end
+print "."
+
+match.match_participants.find_each do |m_participant|
+  Result.find_or_create_by(match_participant_id: m_participant.id) do |result|
+    result.score = 2
+    result.final = true
+  end
+end
+
+puts " Success!"
