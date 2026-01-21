@@ -3,18 +3,10 @@ Rails.application.routes.draw do
   resource :session
   resources :passwords, param: :token
   resources :participants
-
   resources :matches
   resources :events
-
-  resources :betting_pools do
-    member do
-      post :join
-      post :leave
-      get :matches
-    end
-  end
- resources :predictions
+  resources :betting_pools
+  resources :predictions
 
   namespace :admin do
     root to: "dashboard#index"

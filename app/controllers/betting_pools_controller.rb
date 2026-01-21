@@ -47,45 +47,6 @@ class BettingPoolsController < ApplicationController
     redirect_to betting_pools_url, notice: "Betting pool was successfully deleted."
   end
 
-  def join
-    @betting_pool = BettingPool.find(params[:id])
-
-    membership = @betting_pool.betting_pool_memberships.find_or_initialize_by(user: Current.user)
-    membership.joined_at = Time.current if membership.new_record?
-    membership.role = "member"
-
-    if membership.save
-      redirect_to @betting_pool, notice: "Successfully joined the betting pool!"
-    else
-      redirect_to @betting_pool, alert: "Unable to join the betting pool."
-    end
-  end
-
-  def leave
-    @betting_pool = BettingPool.find(params[:id])
-    membership = @betting_pool.betting_pool_memberships.find_by(user: Current.user)
-
-    if membership&.destroy
-      redirect_to betting_pools_path, notice: "Successfully left the betting pool."
-    else
-      redirect_to @betting_pool, alert: "Unable to leave the betting pool."
-    end
-  end
-
-  def matches
-    @betting_pool = BettingPool.find(params[:id])
-    @matches = @betting_pool.event.matches.includes(:team1, :team2).order(:match_date)
-
-    render json: @matches.map { |match|
-      {
-        id: match.id,
-        team1_name: match.team1&.name,
-        team2_name: match.team2&.name,
-        match_date: match.match_date.strftime("%b %d, %Y %H:%M")
-      }
-    }
-  end
-
   private
 
   def set_betting_pool
