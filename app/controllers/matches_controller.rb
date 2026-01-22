@@ -9,7 +9,7 @@ class MatchesController < ApplicationController
   def show
     @match = Match.includes(
       :event,
-      match_participants: [:participant, :result],
+      match_participants: [ :participant, :result ],
       predictions: [
         :user,
         predicted_results: { match_participant: :participant }
