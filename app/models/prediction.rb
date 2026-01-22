@@ -7,6 +7,8 @@ class Prediction < ApplicationRecord
 
   validates :user_id, uniqueness: { scope: [ :betting_pool_id, :match_id ] }
 
+  accepts_nested_attributes_for :predicted_results
+
   def self.create_for_match!(user:, betting_pool:, match:, scores:)
     transaction do
       prediction = create!(

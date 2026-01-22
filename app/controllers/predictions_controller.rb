@@ -53,15 +53,22 @@ class PredictionsController < ApplicationController
   end
 
   def edit
-    authorize_prediction!
+    @prediction = Prediction.includes(
+      :betting_pool,
+      predicted_results: { match_participant: :participant },
+      match: [ :event, { match_participants: [ :participant, :result ] } ]
+    ).find(params[:id])
   end
 
   def update
-    authorize_prediction!
+    @prediction = Prediction.find(params[:id])
 
     if @prediction.update(prediction_params)
       redirect_to @prediction.betting_pool, notice: "Prediction was successfully updated."
     else
+      # Reload associations for form
+      @prediction.reload
+      @prediction.predicted_results.includes(match_participant: :participant)
       render :edit, status: :unprocessable_entity
     end
   end
@@ -85,6 +92,6 @@ class PredictionsController < ApplicationController
   end
 
   def prediction_params
-    params.require(:prediction).permit(:betting_pool_id, :match_id)
+    params.require(:prediction).permit(:betting_pool_id, :match_id, predicted_results_attributes: [ :id, :score ])
   end
 end
