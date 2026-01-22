@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_21_205120) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -99,15 +99,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_205120) do
     t.index ["name"], name: "index_participants_on_name", unique: true
   end
 
+  create_table "predicted_results", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "match_participant_id", null: false
+    t.integer "prediction_id", null: false
+    t.integer "score", null: false
+    t.datetime "updated_at", null: false
+    t.index ["match_participant_id"], name: "index_predicted_results_on_match_participant_id"
+    t.index ["prediction_id", "match_participant_id"], name: "index_predicted_results_on_prediction_and_participant", unique: true
+    t.index ["prediction_id"], name: "index_predicted_results_on_prediction_id"
+  end
+
   create_table "predictions", force: :cascade do |t|
     t.bigint "betting_pool_id", null: false
     t.datetime "created_at", null: false
     t.bigint "match_id", null: false
-    t.integer "predicted_score1", null: false
-    t.integer "predicted_score2", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.index ["betting_pool_id", "match_id", "user_id"], name: "index_predictions_on_betting_pool_id_and_match_id_and_user_id", unique: true
+    t.index ["betting_pool_id", "match_id", "user_id"], name: "index_predictions_on_user_pool_match", unique: true
     t.index ["betting_pool_id"], name: "index_predictions_on_betting_pool_id"
     t.index ["match_id"], name: "index_predictions_on_match_id"
     t.index ["user_id"], name: "index_predictions_on_user_id"
@@ -119,7 +128,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_205120) do
     t.integer "match_participant_id", null: false
     t.integer "score"
     t.datetime "updated_at", null: false
-    t.index ["match_participant_id"], name: "index_results_on_match_participant_id"
+    t.index ["match_participant_id"], name: "index_results_on_match_participant_id", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -149,6 +158,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_205120) do
   add_foreign_key "match_participants", "matches"
   add_foreign_key "match_participants", "participants"
   add_foreign_key "matches", "events"
+  add_foreign_key "predicted_results", "match_participants"
+  add_foreign_key "predicted_results", "predictions"
   add_foreign_key "predictions", "betting_pools"
   add_foreign_key "predictions", "matches"
   add_foreign_key "predictions", "users"

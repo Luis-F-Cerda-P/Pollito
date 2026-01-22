@@ -8,10 +8,11 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 print "Seeding primary database"
-User.find_or_create_by!(email_address: Rails.application.credentials.dig("seed_user", "email_address")) do |user|
+user = User.find_or_create_by!(email_address: Rails.application.credentials.dig("seed_user", "email_address")) do |user|
   user.password = Rails.application.credentials.dig("seed_user", "password")
   user.admin = true
 end
+print "."
 
 the_time = Time.current
 
@@ -39,6 +40,30 @@ match.match_participants.find_each do |m_participant|
   Result.find_or_create_by(match_participant_id: m_participant.id) do |result|
     result.score = 2
     result.final = true
+  end
+end
+print "."
+
+betting_pool = BettingPool.find_or_create_by!(name: "Primer Pollyto", event: event) do |pool|
+  pool.creator = user
+end
+print "."
+
+# Create a prediction for the user
+prediction = Prediction.find_or_create_by!(
+  user: user,
+  betting_pool: betting_pool,
+  match: match
+)
+print "."
+
+# Create predicted results for each participant
+match.match_participants.find_each do |m_participant|
+  PredictedResult.find_or_create_by!(
+    prediction: prediction,
+    match_participant: m_participant
+  ) do |predicted_result|
+    predicted_result.score = 3  # User predicted 3-3
   end
 end
 
