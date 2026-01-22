@@ -133,22 +133,6 @@
           </div>
         </div>
       </div>
-      <!-- Join/Leave Actions -->
-      <% if Current.user && !@memberships.find_by(user: Current.user) %>
-
-      <% elsif Current.user && @memberships.find_by(user: Current.user) %>
-        <div class="mt-6 bg-white shadow-md rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Pool Actions</h3>
-          <%= button_to "Leave Pool", leave_betting_pool_path(@betting_pool),
-              data: { turbo_confirm: "Are you sure you want to leave this betting pool?" },
-              class: "w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-center inline-flex items-center justify-center" do %>
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-            </svg>
-            Leave Pool
-          <% end %>
-        </div>
-      <% end %>
     </div>
   </div>
 </div>
