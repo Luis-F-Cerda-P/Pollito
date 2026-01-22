@@ -1,7 +1,7 @@
 class Match < ApplicationRecord
   belongs_to :event
 
-  has_many :match_participants, dependent: :destroy
+  has_many :match_participants, dependent: :destroy, inverse_of: :match
   has_many :participants, through: :match_participants
   has_many :results, through: :match_participants, dependent: :destroy
 
@@ -22,6 +22,19 @@ class Match < ApplicationRecord
   # to which Match belongs in turn, and that declares that Match 'has_one :event, trough: :phase'.
   # Phases could be 'group-stage', 'quarter-finals', 'finals', etc
   validates :round, presence: true, numericality: { greater_than: 0 }
+
+  accepts_nested_attributes_for :match_participants, allow_destroy: true
+
+  validate :at_least_two_participants
+
+  private
+
+  def at_least_two_participants
+    participants_count = match_participants.reject(&:marked_for_destruction?).size
+    if participants_count < 2
+      errors.add(:base, "Match must have at least 2 participants")
+    end
+  end
 
   scope :by_event, ->(event) { where(event_id: event) }
 
