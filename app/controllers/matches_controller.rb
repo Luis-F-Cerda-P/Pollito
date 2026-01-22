@@ -7,6 +7,14 @@ class MatchesController < ApplicationController
   end
 
   def show
+    @match = Match.includes(
+      :event,
+      match_participants: [:participant, :result],
+      predictions: [
+        :user,
+        predicted_results: { match_participant: :participant }
+      ]
+    ).find(params[:id])
   end
 
   def new

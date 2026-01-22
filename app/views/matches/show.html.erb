@@ -11,47 +11,97 @@
     </div>
   </div>
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
     <div class="lg:col-span-2">
+      <!-- Match Information -->
       <div class="bg-white shadow-md rounded-lg mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
           <h2 class="text-xl font-semibold text-gray-900">Match Information</h2>
         </div>
         <div class="p-6">
-          <div class="flex items-center justify-between mb-6">
-            <div class="text-center flex-1">
-              <div class="text-2xl font-bold text-gray-900 mb-2">
-                <%= @match.team1&.name || "TBD" %>
-              </div>
-              <% if @match.team1.present? %>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                  <%= @match.team1.country_code.upcase %>
-                </span>
-              <% end %>
-            </div>
-            <div class="px-8 text-center">
-              <div class="text-3xl font-bold text-gray-900">
-                <% if @match.score1.present? && @match.score2.present? %>
-                  <%= @match.score1 %> - <%= @match.score2 %>
-                <% else %>
-                  vs
+          <!-- Match Participants Display -->
+          <div class="mb-6">
+            <% match_completed = @match.match_participants.all? { |mp| mp.result&.final } %>
+            <% if @match.participants.count == 2 %>
+              <!-- Two-Participant Layout (side by side) -->
+              <div class="flex items-center justify-between">
+                <% @match.match_participants.includes(:participant, :result).each_with_index do |mp, index| %>
+                  <div class="text-center flex-1">
+                    <div class="text-2xl font-bold text-gray-900 mb-2">
+                      <%= mp.participant.name %>
+                    </div>
+                    <% if match_completed %>
+                      <div class="text-4xl font-bold text-blue-600 mt-3">
+                        <%= mp.result.score %>
+                      </div>
+                    <% end %>
+                  </div>
+                  <% if index == 0 %>
+                    <div class="px-8 text-center">
+                      <div class="text-3xl font-bold text-gray-500">
+                        <%= match_completed ? "-" : "vs" %>
+                      </div>
+                      <% if @match.round.present? %>
+                        <div class="text-sm text-gray-500 mt-1">
+                          Round <%= @match.round %>
+                        </div>
+                      <% end %>
+                    </div>
+                  <% end %>
                 <% end %>
               </div>
-              <div class="text-sm text-gray-500 mt-1">
-                <% if @match.round.present? %>Round <%= @match.round %><% end %>
+            <% else %>
+              <!-- Multi-Participant Layout (vertical list) -->
+              <div class="space-y-3">
+                <% @match.match_participants.includes(:participant, :result).each do |mp| %>
+                  <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    <div class="flex items-center space-x-4">
+                      <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                        <%= mp.participant.name.first.upcase %>
+                      </div>
+                      <div class="text-lg font-semibold text-gray-900">
+                        <%= mp.participant.name %>
+                      </div>
+                    </div>
+                    <% if match_completed %>
+                      <div class="text-3xl font-bold text-blue-600">
+                        <%= mp.result.score %>
+                      </div>
+                    <% else %>
+                      <span class="text-sm text-gray-500 italic">TBD</span>
+                    <% end %>
+                  </div>
+                <% end %>
               </div>
-            </div>
-            <div class="text-center flex-1">
-              <div class="text-2xl font-bold text-gray-900 mb-2">
-                <%= @match.team2&.name || "TBD" %>
-              </div>
-              <% if @match.team2.present? %>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                  <%= @match.team2.country_code.upcase %>
+            <% end %>
+            <!-- Match Status Badge -->
+            <div class="mt-6 flex justify-center">
+              <% if match_completed %>
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                  </svg>
+                  Match Completed
+                </span>
+              <% elsif @match.match_date > Time.current %>
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                  </svg>
+                  Upcoming
+                </span>
+              <% else %>
+                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                  <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                  </svg>
+                  In Progress
                 </span>
               <% end %>
             </div>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Additional Match Info -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
             <div>
               <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Event</h3>
               <p class="text-lg text-gray-900">
@@ -64,44 +114,73 @@
                 <%= @match.match_date.strftime("%B %d, %Y at %H:%M") %>
               </p>
             </div>
+            <% if @match.round.present? %>
+              <div>
+                <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Round</h3>
+                <p class="text-lg text-gray-900">
+                  Round <%= @match.round %>
+                </p>
+              </div>
+            <% end %>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Participants</h3>
+              <p class="text-lg text-gray-900">
+                <%= @match.participants.count %> participants
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <!-- Sidebar -->
     <div class="lg:col-span-1">
-      <% if @match.predictions.any? %>
-        <div class="bg-white shadow-md rounded-lg">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Predictions (<%= @match.predictions.count %>)</h2>
-          </div>
-          <div class="p-6">
-            <div class="space-y-3">
-              <% @match.predictions.includes(:user).each do |prediction| %>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div>
-                    <div class="font-medium text-gray-900"><%= prediction.user.email_address %></div>
-                    <div class="text-sm text-gray-600">
-                      <%= prediction.predicted_score1 %> - <%= prediction.predicted_score2 %>
+      <!-- Predictions -->
+      <div class="bg-white shadow-md rounded-lg">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-xl font-semibold text-gray-900">Predictions (<%= @match.predictions.count %>)</h2>
+        </div>
+        <div class="p-6">
+          <% if @match.predictions.any? %>
+            <div class="space-y-3 max-h-96 overflow-y-auto">
+              <% @match.predictions.includes(:user, predicted_results: { match_participant: :participant }).each do |prediction| %>
+                <div class="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-150">
+                  <div class="flex items-center space-x-2 mb-2">
+                    <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                      <%= prediction.user.email_address.first.upcase %>
+                    </div>
+                    <div class="font-medium text-gray-900 text-sm">
+                      <%= prediction.user.email_address %>
                     </div>
                   </div>
-                  <div class="text-xs text-gray-500">
-                    <%= prediction.created_at.strftime("%b %d") %>
+                  <div class="space-y-1 ml-8">
+                    <% prediction.predicted_results.each do |pr| %>
+                      <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600">
+                          <%= pr.match_participant.participant.name %>
+                        </span>
+                        <span class="font-bold text-blue-600">
+                          <%= pr.score %>
+                        </span>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="mt-2 text-xs text-gray-500 text-right">
+                    <%= prediction.created_at.strftime("%b %d, %H:%M") %>
                   </div>
                 </div>
               <% end %>
             </div>
-          </div>
+          <% else %>
+            <div class="text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+              <div class="text-gray-500">No predictions yet</div>
+              <p class="text-gray-400 text-sm mt-1">Be the first to predict!</p>
+            </div>
+          <% end %>
         </div>
-      <% else %>
-        <div class="bg-white shadow-md rounded-lg">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-xl font-semibold text-gray-900">Predictions</h2>
-          </div>
-          <div class="p-6 text-center text-gray-500">
-            No predictions yet for this match
-          </div>
-        </div>
-      <% end %>
+      </div>
     </div>
   </div>
 </div>
