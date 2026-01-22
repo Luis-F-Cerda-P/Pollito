@@ -4,8 +4,6 @@ class CreatePredictions < ActiveRecord::Migration[8.0]
       t.bigint :betting_pool_id, null: false
       t.bigint :match_id, null: false
       t.bigint :user_id, null: false
-      t.integer :predicted_score1, null: false
-      t.integer :predicted_score2, null: false
 
       t.timestamps
     end
@@ -13,7 +11,7 @@ class CreatePredictions < ActiveRecord::Migration[8.0]
     add_index :predictions, :betting_pool_id
     add_index :predictions, :match_id
     add_index :predictions, :user_id
-    add_index :predictions, [ :betting_pool_id, :match_id, :user_id ], unique: true
+    add_index :predictions, [ :betting_pool_id, :match_id, :user_id ], unique: true, name: 'index_predictions_on_user_pool_match'
 
     add_foreign_key :predictions, :betting_pools
     add_foreign_key :predictions, :matches
