@@ -4,7 +4,16 @@ class PredictionsController < ApplicationController
 
   def index
     if Current.user
-      @predictions = Prediction.where(user: Current.user).includes(:match, :betting_pool).order(created_at: :desc)
+        @predictions = Current.user.predictions
+          .includes(
+            :betting_pool,
+            predicted_results: { match_participant: :participant },
+            match: {
+              event: {},  # Empty hash, or just include it at the top level
+              match_participants: [ :participant, :result ]
+            }
+          )
+          .order(created_at: :desc)
     else
       redirect_to new_session_path, alert: "Please sign in to view your predictions."
     end
@@ -20,7 +29,6 @@ class PredictionsController < ApplicationController
 
     if params[:betting_pool_id].present?
       @selected_pool = BettingPool.find(params[:betting_pool_id])
-      @matches = @selected_pool.matches.includes(:team1, :team2)
     end
 
     @prediction = Prediction.new
@@ -36,7 +44,7 @@ class PredictionsController < ApplicationController
       @betting_pools = Current.user.betting_pools.includes(:event)
       if @prediction.betting_pool.present?
         @selected_pool = @prediction.betting_pool
-        @matches = @selected_pool.event.matches.includes(:team1, :team2)
+        @matches = @selected_pool.event.matches.includes(:participants)
       else
         @matches = Match.none
       end
@@ -77,6 +85,6 @@ class PredictionsController < ApplicationController
   end
 
   def prediction_params
-    params.require(:prediction).permit(:betting_pool_id, :match_id, :predicted_score1, :predicted_score2)
+    params.require(:prediction).permit(:betting_pool_id, :match_id)
   end
 end

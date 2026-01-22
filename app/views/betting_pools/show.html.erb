@@ -11,7 +11,9 @@
     </div>
   </div>
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main Content -->
     <div class="lg:col-span-2 space-y-6">
+      <!-- Pool Information -->
       <div class="bg-white shadow-md rounded-lg">
         <div class="px-6 py-4 border-b border-gray-200">
           <h2 class="text-xl font-semibold text-gray-900">Pool Information</h2>
@@ -31,6 +33,7 @@
           </div>
         </div>
       </div>
+      <!-- Recent Predictions -->
       <div class="bg-white shadow-md rounded-lg">
         <div class="px-6 py-4 border-b border-gray-200">
           <h2 class="text-xl font-semibold text-gray-900">Recent Predictions (<%= @predictions.count %>)</h2>
@@ -39,33 +42,73 @@
           <% if @predictions.any? %>
             <div class="space-y-4">
               <% @predictions.order(created_at: :desc).limit(10).each do |prediction| %>
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div class="flex-1">
-                    <div class="font-medium text-gray-900"><%= prediction.user.email_address %></div>
-                    <div class="text-sm text-gray-600 mt-1">
-                      <%= prediction.match.team1&.name || "TBD" %> vs <%= prediction.match.team2&.name || "TBD" %>
+                <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-150">
+                  <!-- Prediction Header -->
+                  <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                        <%= prediction.user.email_address.first.upcase %>
+                      </div>
+                      <div>
+                        <div class="font-medium text-gray-900"><%= prediction.user.email_address %></div>
+                        <div class="text-xs text-gray-500">
+                          <%= prediction.match.participants.map(&:name).join(" vs ") %>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                      <%= prediction.created_at.strftime("%b %d, %Y") %>
                     </div>
                   </div>
-                  <div class="text-center mx-6">
-                    <div class="text-lg font-bold text-blue-600">
-                      <%= prediction.predicted_score1 %> - <%= prediction.predicted_score2 %>
+                  <!-- Predicted Scores -->
+                  <div class="grid grid-cols-2 gap-3">
+                    <% prediction.predicted_results.includes(match_participant: :participant).each do |pr| %>
+                      <div class="flex items-center justify-between bg-blue-50 rounded-lg px-3 py-2">
+                        <span class="text-sm font-medium text-gray-700">
+                          <%= pr.match_participant.participant.name %>
+                        </span>
+                        <span class="text-lg font-bold text-blue-600">
+                          <%= pr.score %>
+                        </span>
+                      </div>
+                    <% end %>
+                  </div>
+                  <!-- Actual Results (if available) -->
+                  <% if prediction.match.match_participants.all? { |mp| mp.result&.final } %>
+                    <div class="mt-3 pt-3 border-t border-gray-200">
+                      <div class="text-xs font-medium text-gray-500 uppercase mb-2">Actual Result</div>
+                      <div class="grid grid-cols-2 gap-3">
+                        <% prediction.match.match_participants.includes(:participant, :result).each do |mp| %>
+                          <div class="flex items-center justify-between bg-green-50 rounded-lg px-3 py-2">
+                            <span class="text-sm font-medium text-gray-700">
+                              <%= mp.participant.name %>
+                            </span>
+                            <span class="text-lg font-bold text-green-600">
+                              <%= mp.result.score %>
+                            </span>
+                          </div>
+                        <% end %>
+                      </div>
                     </div>
-                  </div>
-                  <div class="text-sm text-gray-500">
-                    <%= prediction.created_at.strftime("%b %d, %Y") %>
-                  </div>
+                  <% end %>
                 </div>
               <% end %>
             </div>
           <% else %>
-            <div class="text-center text-gray-500 py-8">
-              No predictions have been made yet in this pool.
+            <div class="text-center py-12">
+              <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+              <div class="text-gray-500 text-lg">No predictions yet</div>
+              <p class="text-gray-600 mt-2">Be the first to make a prediction in this pool!</p>
             </div>
           <% end %>
         </div>
       </div>
     </div>
+    <!-- Sidebar -->
     <div class="lg:col-span-1">
+      <!-- Members List -->
       <div class="bg-white shadow-md rounded-lg">
         <div class="px-6 py-4 border-b border-gray-200">
           <h2 class="text-xl font-semibold text-gray-900">Members (<%= @memberships.count %>)</h2>
@@ -90,19 +133,20 @@
           </div>
         </div>
       </div>
+      <!-- Join/Leave Actions -->
       <% if Current.user && !@memberships.find_by(user: Current.user) %>
-        <div class="mt-6 bg-white shadow-md rounded-lg p-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Join This Pool</h3>
-          <p class="text-gray-600 mb-4">Join this betting pool to start making predictions and competing with other members.</p>
-          <%= link_to "Join Pool", join_betting_pool_path(@betting_pool), method: :post,
-              class: "w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-center" %>
-        </div>
+
       <% elsif Current.user && @memberships.find_by(user: Current.user) %>
         <div class="mt-6 bg-white shadow-md rounded-lg p-6">
           <h3 class="text-lg font-medium text-gray-900 mb-4">Pool Actions</h3>
-          <%= link_to "Leave Pool", leave_betting_pool_path(@betting_pool), method: :post,
-              data: { confirm: "Are you sure you want to leave this betting pool?" },
-              class: "w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-center" %>
+          <%= button_to "Leave Pool", leave_betting_pool_path(@betting_pool),
+              data: { turbo_confirm: "Are you sure you want to leave this betting pool?" },
+              class: "w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 text-center inline-flex items-center justify-center" do %>
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+            </svg>
+            Leave Pool
+          <% end %>
         </div>
       <% end %>
     </div>

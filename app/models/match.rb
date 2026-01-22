@@ -24,4 +24,8 @@ class Match < ApplicationRecord
   validates :round, presence: true, numericality: { greater_than: 0 }
 
   scope :by_event, ->(event) { where(event_id: event) }
+
+  def display_name
+    participants.map(&:name).join(" vs. ")
+  end
 end
