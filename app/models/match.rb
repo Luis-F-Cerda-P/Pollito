@@ -3,7 +3,7 @@ class Match < ApplicationRecord
 
   has_many :match_participants, dependent: :destroy
   has_many :participants, through: :match_participants
-  has_many :results, through: :match_participants
+  has_many :results, through: :match_participants, dependent: :destroy
 
   has_many :predictions, dependent: :destroy
 
