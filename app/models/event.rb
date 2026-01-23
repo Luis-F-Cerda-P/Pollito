@@ -1,5 +1,6 @@
 class Event < ApplicationRecord
-  has_many :matches, dependent: :destroy
+  has_many :stages, dependent: :destroy
+  has_many :matches, through: :stages
   has_many :betting_pools, dependent: :destroy
 
   validates :name, presence: true, uniqueness: true

@@ -1,5 +1,6 @@
 class Match < ApplicationRecord
-  belongs_to :event
+  belongs_to :stage
+  has_one :event, through: :stage
 
   has_many :match_participants, dependent: :destroy, inverse_of: :match
   has_many :participants, through: :match_participants
