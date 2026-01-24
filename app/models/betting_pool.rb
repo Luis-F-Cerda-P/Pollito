@@ -6,16 +6,18 @@ class BettingPool < ApplicationRecord
   has_many :users, through: :betting_pool_memberships
   has_many :predictions, dependent: :destroy
 
+  validates :creator, presence: true
   validates :name, presence: true
   validates :name, uniqueness: { scope: :event_id, message: "must be unique within this event" }
+
+  after_create :add_creator_as_admin
 
   def add_user(user, role: :member)
     return false if user_in_pool?(user)
 
     membership = betting_pool_memberships.create!(
       user: user,
-      role: role,
-      joined_at: Time.current
+      role: role
     )
     membership
   end
@@ -44,5 +46,13 @@ class BettingPool < ApplicationRecord
 
   def predictions_for_match(match)
     predictions.where(match: match)
+  end
+
+  private
+
+  def add_creator_as_admin
+    betting_pool_memberships.find_or_create_by!(user: creator) do |m|
+      m.role = :admin
+    end
   end
 end

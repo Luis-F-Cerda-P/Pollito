@@ -4,7 +4,7 @@ class CreateBettingPoolMemberships < ActiveRecord::Migration[8.0]
       t.bigint :betting_pool_id, null: false
       t.bigint :user_id, null: false
       t.string :role, null: false, default: 'member'
-      t.datetime :joined_at, null: false
+      t.integer :score, null: true
 
       t.timestamps
     end

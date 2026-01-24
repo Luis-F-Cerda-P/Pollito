@@ -3,7 +3,6 @@ class BettingPoolMembership < ApplicationRecord
   belongs_to :user
 
   validates :role, presence: true, inclusion: { in: %w[admin member] }
-  validates :joined_at, presence: true
   validates :user_id, uniqueness: { scope: :betting_pool_id, message: "already a member of this betting pool" }
 
   scope :admin, -> { where(role: "admin") }

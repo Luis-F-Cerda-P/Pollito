@@ -23,6 +23,10 @@ event = Event.find_or_create_by!(name: "Fifa world Cup") do |event|
 end
 print "."
 
+stage = Stage.find_or_create_by!(name: "Final") do |stage|
+  stage.event = event
+end
+
 participants = [ "France", "Argentina" ].map do |country|
   Participant.find_or_create_by!(name: country)
 end
@@ -31,7 +35,7 @@ print "."
 match = Match.find_or_create_by!(id: 1) do |match|
   match.match_date = the_time
   match.round = 1
-  match.event = event
+  match.stage = stage
   match.participants = participants
 end
 print "."
@@ -46,6 +50,7 @@ print "."
 
 betting_pool = BettingPool.find_or_create_by!(name: "Primer Pollyto", event: event) do |pool|
   pool.creator = user
+  pool.is_public = true
 end
 print "."
 

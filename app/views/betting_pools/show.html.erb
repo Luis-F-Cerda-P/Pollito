@@ -124,7 +124,7 @@
                   <div>
                     <div class="font-medium text-gray-900"><%= membership.user.email_address %></div>
                     <div class="text-xs text-gray-500">
-                      <%= membership.role.humanize %> • Joined <%= membership.joined_at.strftime("%b %d, %Y") %>
+                      <%= membership.role.humanize %> • Joined <%= membership.created_at.strftime("%b %d, %Y") %>
                     </div>
                   </div>
                 </div>
