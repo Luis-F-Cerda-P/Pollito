@@ -10,14 +10,13 @@ class BettingPool < ApplicationRecord
   validates :name, presence: true
   validates :name, uniqueness: { scope: :event_id, message: "must be unique within this event" }
 
-  after_create :add_creator_as_admin
+  after_create :add_creator_to_members
 
-  def add_user(user, role: :member)
+  def add_user(user)
     return false if user_in_pool?(user)
 
     membership = betting_pool_memberships.create!(
-      user: user,
-      role: role
+      user: user
     )
     membership
   end
@@ -31,15 +30,6 @@ class BettingPool < ApplicationRecord
     users.include?(user)
   end
 
-  def user_role(user)
-    membership = betting_pool_memberships.find_by(user: user)
-    membership&.role
-  end
-
-  def admin?(user)
-    user_role(user) == "admin"
-  end
-
   def member_count
     users.count
   end
@@ -50,9 +40,7 @@ class BettingPool < ApplicationRecord
 
   private
 
-  def add_creator_as_admin
-    betting_pool_memberships.find_or_create_by!(user: creator) do |m|
-      m.role = :admin
-    end
+  def add_creator_to_members
+    betting_pool_memberships.find_or_create_by!(user: creator)
   end
 end
