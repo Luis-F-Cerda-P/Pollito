@@ -3,8 +3,8 @@ class CreateBettingPoolMemberships < ActiveRecord::Migration[8.0]
     create_table :betting_pool_memberships do |t|
       t.bigint :betting_pool_id, null: false
       t.bigint :user_id, null: false
-      t.string :role, null: false, default: 'member'
       t.integer :score, null: true
+      t.integer :rank, null: true
 
       t.timestamps
     end
