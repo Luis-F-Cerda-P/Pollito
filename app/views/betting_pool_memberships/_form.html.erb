@@ -1,0 +1,30 @@
+<%= form_with(model: [@betting_pool, @betting_pool_membership], class: "space-y-6") do |form| %>
+  <% if @betting_pool_membership.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-red-800 mb-2">
+        <%= pluralize(@betting_pool_membership.errors.count, "error") %> prohibited this membership from being saved:
+      </h3>
+      <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+        <% @betting_pool_membership.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  <div>
+    <%= form.label :user_id, "Member", class: "block text-sm font-medium text-gray-700 mb-2" %>
+    <%= form.collection_select :user_id,
+        User.where.not(id: @betting_pool.user_ids),
+        :id,
+        :email_address,
+        { prompt: "Select a user to add" },
+        { class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" } %>
+    <p class="mt-1 text-sm text-gray-500">Choose a user to add to this betting pool</p>
+  </div>
+  <div class="flex items-center justify-end space-x-3 pt-4">
+    <%= link_to "Cancel", betting_pool_path(@betting_pool),
+        class: "px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors duration-200" %>
+    <%= form.submit "Add Member", 
+        class: "px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200" %>
+  </div>
+<% end %>

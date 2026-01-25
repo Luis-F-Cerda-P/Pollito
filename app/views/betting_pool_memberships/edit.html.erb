@@ -1,0 +1,10 @@
+<% content_for :title, "Editing betting pool membership" %>
+
+<div class="md:w-2/3 w-full">
+  <h1 class="font-bold text-4xl">Editing betting pool membership</h1>
+
+  <%= render "form", betting_pool_membership: @betting_pool_membership %>
+
+  <%= link_to "Show this betting pool membership", @betting_pool_membership, class: "w-full sm:w-auto text-center mt-2 sm:mt-0 sm:ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
+  <%= link_to "Back to betting pool memberships", betting_pool_betting_pool_memberships_path(@betting_pool_membership.betting_pool, @betting_pool_membership), class: "w-full sm:w-auto text-center mt-2 sm:mt-0 sm:ml-2 rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
+</div>

@@ -124,10 +124,13 @@
                   <div>
                     <div class="font-medium text-gray-900"><%= membership.user.email_address %></div>
                     <div class="text-xs text-gray-500">
-                      <%= membership.role.humanize %> • Joined <%= membership.created_at.strftime("%b %d, %Y") %>
+                      <%= membership.admin? ? "Admin" : "Member" %> • Joined <%= membership.created_at.strftime("%b %d, %Y") %>
                     </div>
                   </div>
                 </div>
+                <div class="flex items-center space-x-3 font-medium text-gray-900">
+                  Score: <%= membership.score || 0  %>
+                <div>
               </div>
             <% end %>
           </div>
