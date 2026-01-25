@@ -4,6 +4,8 @@ class CreatePredictions < ActiveRecord::Migration[8.0]
       t.bigint :betting_pool_id, null: false
       t.bigint :match_id, null: false
       t.bigint :user_id, null: false
+      t.integer :outcome_points, null: true
+      t.integer :total_points, null: true
 
       t.timestamps
     end
