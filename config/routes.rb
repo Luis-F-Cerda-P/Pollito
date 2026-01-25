@@ -5,7 +5,9 @@ Rails.application.routes.draw do
   resources :participants
   resources :matches
   resources :events
-  resources :betting_pools
+  resources :betting_pools do
+    resources :betting_pool_memberships, shallow: true
+  end
   resources :predictions
 
   namespace :admin do
