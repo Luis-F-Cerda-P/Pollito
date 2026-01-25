@@ -1,4 +1,6 @@
 class Prediction < ApplicationRecord
+  include Scorable
+
   belongs_to :betting_pool
   belongs_to :match
   belongs_to :user
