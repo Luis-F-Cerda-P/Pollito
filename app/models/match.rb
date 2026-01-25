@@ -40,7 +40,20 @@ class Match < ApplicationRecord
     winners.count > 1 ? :draw : winners.keys.first
   end
 
+  def mark_as_final!
+    transaction do
+      update!(match_status: :finished)
+      score_all_predictions!
+    end
+  end
+
   private
+
+  def score_all_predictions!
+    predictions.find_each do |prediction|
+      prediction.calculate_score!
+    end
+  end
 
   def at_least_two_participants
     participants_count = match_participants.reject(&:marked_for_destruction?).size
