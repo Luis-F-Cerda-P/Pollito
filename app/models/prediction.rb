@@ -9,6 +9,16 @@ class Prediction < ApplicationRecord
 
   accepts_nested_attributes_for :predicted_results
 
+  def predicted_outcome
+    scores = predicted_results.pluck(:match_participant_id, :score).to_h
+    return nil if scores.empty?
+
+    max_score = scores.values.max
+    winners = scores.select { |_, score| score == max_score }
+
+    winners.count > 1 ? :draw : winners.keys.first
+  end
+
   def self.create_for_match!(user:, betting_pool:, match:, scores:)
     transaction do
       prediction = create!(

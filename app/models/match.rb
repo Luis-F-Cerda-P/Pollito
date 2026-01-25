@@ -28,6 +28,18 @@ class Match < ApplicationRecord
 
   validate :at_least_two_participants
 
+  def outcome
+    return nil unless finished?
+
+    scores = results.pluck(:match_participant_id, :score).to_h
+    return nil if scores.empty?
+
+    max_score = scores.values.max
+    winners = scores.select { |_, score| score == max_score }
+
+    winners.count > 1 ? :draw : winners.keys.first
+  end
+
   private
 
   def at_least_two_participants
