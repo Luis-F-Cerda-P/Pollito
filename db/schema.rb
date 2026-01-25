@@ -42,8 +42,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
   create_table "betting_pool_memberships", force: :cascade do |t|
     t.bigint "betting_pool_id", null: false
     t.datetime "created_at", null: false
-    t.datetime "joined_at", null: false
-    t.string "role", default: "member", null: false
+    t.integer "rank"
+    t.integer "score"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["betting_pool_id", "user_id"], name: "index_betting_pool_memberships_on_betting_pool_id_and_user_id", unique: true
@@ -55,6 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
     t.datetime "created_at", null: false
     t.bigint "creator_id", null: false
     t.bigint "event_id", null: false
+    t.boolean "is_public", default: false, null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_betting_pools_on_creator_id"
@@ -83,13 +84,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
 
   create_table "matches", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.bigint "event_id", null: false
     t.datetime "match_date"
     t.integer "match_status"
     t.integer "round"
+    t.bigint "stage_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["event_id", "match_date"], name: "index_matches_on_event_id_and_match_date"
-    t.index ["event_id"], name: "index_matches_on_event_id"
+    t.index ["stage_id", "match_date"], name: "index_matches_on_stage_id_and_match_date"
+    t.index ["stage_id"], name: "index_matches_on_stage_id"
   end
 
   create_table "participants", force: :cascade do |t|
@@ -140,6 +141,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "stages", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "event_id", null: false
+    t.string "name"
+    t.datetime "updated_at", null: false
+    t.index ["event_id", "name"], name: "index_stages_on_event_id_and_name", unique: true
+    t.index ["event_id"], name: "index_stages_on_event_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.boolean "admin", default: false, null: false
     t.datetime "created_at", null: false
@@ -157,7 +167,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
   add_foreign_key "betting_pools", "users", column: "creator_id"
   add_foreign_key "match_participants", "matches"
   add_foreign_key "match_participants", "participants"
-  add_foreign_key "matches", "events"
+  add_foreign_key "matches", "stages"
   add_foreign_key "predicted_results", "match_participants"
   add_foreign_key "predicted_results", "predictions"
   add_foreign_key "predictions", "betting_pools"
@@ -165,4 +175,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
   add_foreign_key "predictions", "users"
   add_foreign_key "results", "match_participants"
   add_foreign_key "sessions", "users"
+  add_foreign_key "stages", "events"
 end
