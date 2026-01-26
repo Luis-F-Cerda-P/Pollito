@@ -1,0 +1,105 @@
+<%# Local variables: match, prediction, betting_pool, show_stage (optional) %>
+<% show_stage ||= false %>
+<% is_open = match.bets_open? %>
+<% has_prediction = prediction.present? && prediction.persisted? %>
+
+<div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-150"
+     data-controller="prediction-form"
+     data-prediction-form-match-status-value="<%= match.match_status %>">
+
+  <!-- Match info header -->
+  <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center space-x-3">
+      <div class="text-sm text-gray-500">
+        <%= match.match_date.strftime("%b %d, %H:%M") %>
+        <% if show_stage && match.stage %>
+          <span class="text-gray-400">|</span>
+          <span class="text-gray-600"><%= match.stage.name %></span>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Status badge -->
+    <div data-prediction-form-target="status">
+      <% if !is_open %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+          <%= match.match_status.humanize %>
+        </span>
+      <% elsif has_prediction %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-600">
+          Saved
+        </span>
+      <% else %>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-600">
+          Not predicted
+        </span>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Prediction form -->
+  <%= form_with url: upsert_predictions_path,
+                method: :post,
+                data: {
+                  turbo_frame: "_self",
+                  prediction_form_target: "form"
+                } do |f| %>
+
+    <%= hidden_field_tag :betting_pool_id, betting_pool.id %>
+    <%= hidden_field_tag :match_id, match.id %>
+
+    <div class="flex items-center justify-center space-x-4">
+      <% match.match_participants.each_with_index do |mp, i| %>
+        <%
+          # Find existing predicted result for this participant
+          existing_score = nil
+          if prediction && prediction.predicted_results.loaded?
+            pr = prediction.predicted_results.find { |r| r.match_participant_id == mp.id }
+            existing_score = pr&.score
+          elsif prediction
+            pr = prediction.predicted_results.find_by(match_participant_id: mp.id)
+            existing_score = pr&.score
+          end
+        %>
+
+        <div class="flex-1 text-center">
+          <div class="font-medium text-gray-900 mb-2 truncate" title="<%= mp.participant.name %>">
+            <%= mp.participant.name %>
+          </div>
+          <input type="number"
+                 name="prediction[predicted_results_attributes][<%= i %>][score]"
+                 value="<%= existing_score %>"
+                 min="0"
+                 max="9"
+                 data-prediction-form-target="scoreInput"
+                 data-action="input->prediction-form#onInput"
+                 class="w-16 h-12 text-center text-2xl font-bold border-2 rounded-lg
+                        <%= is_open ? 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500' : 'border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed' %>"
+                 <%= 'disabled' unless is_open %>>
+          <%= hidden_field_tag "prediction[predicted_results_attributes][#{i}][match_participant_id]", mp.id %>
+          <% if prediction && !prediction.new_record? %>
+            <% pr = prediction.predicted_results.find { |r| r.match_participant_id == mp.id } || prediction.predicted_results.find_by(match_participant_id: mp.id) %>
+            <% if pr&.id %>
+              <%= hidden_field_tag "prediction[predicted_results_attributes][#{i}][id]", pr.id %>
+            <% end %>
+          <% end %>
+        </div>
+
+        <% if i == 0 %>
+          <span class="text-gray-400 font-medium text-lg">vs</span>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Loading spinner (hidden) -->
+    <div data-prediction-form-target="loading" class="hidden mt-3 text-center">
+      <span class="inline-flex items-center text-sm text-gray-500">
+        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Saving...
+      </span>
+    </div>
+  <% end %>
+</div>

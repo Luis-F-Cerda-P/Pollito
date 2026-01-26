@@ -22,7 +22,11 @@ Rails.application.routes.draw do
   resources :betting_pools do
     resources :betting_pool_memberships, shallow: true
   end
-  resources :predictions
+  resources :predictions do
+    collection do
+      post :upsert
+    end
+  end
 
   namespace :admin do
     root to: "dashboard#index"

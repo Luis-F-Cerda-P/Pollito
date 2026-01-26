@@ -60,6 +60,8 @@ class Match < ApplicationRecord
   end
 
   scope :by_event, ->(event) { where(event_id: event) }
+  scope :bets_open, -> { where(match_status: :bets_open) }
+  scope :bets_closed_or_later, -> { where(match_status: [ :bets_closed, :in_progress, :finished ]) }
 
   def display_name
     participants.map(&:name).join(" vs. ")

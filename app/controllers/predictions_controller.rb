@@ -81,6 +81,47 @@ class PredictionsController < ApplicationController
     redirect_to betting_pool, notice: "Prediction was successfully deleted."
   end
 
+  def upsert
+    @betting_pool = BettingPool.find(params[:betting_pool_id])
+    @match = Match.find(params[:match_id])
+
+    # Authorization: must be pool member
+    unless @betting_pool.user_in_pool?(Current.user)
+      return head :forbidden
+    end
+
+    # Can only predict on open matches
+    unless @match.bets_open?
+      return head :forbidden
+    end
+
+    # Find or initialize prediction
+    @prediction = Prediction.find_or_initialize_by(
+      user: Current.user,
+      betting_pool: @betting_pool,
+      match: @match
+    )
+
+    # Build predicted_results if new
+    if @prediction.new_record?
+      @match.match_participants.each do |mp|
+        @prediction.predicted_results.build(match_participant: mp)
+      end
+    end
+
+    if @prediction.update(prediction_params)
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to @betting_pool }
+      end
+    else
+      respond_to do |format|
+        format.turbo_stream { render :upsert_error, status: :unprocessable_entity }
+        format.html { redirect_to @betting_pool, alert: @prediction.errors.full_messages.join(", ") }
+      end
+    end
+  end
+
   private
 
   def set_prediction
@@ -92,6 +133,6 @@ class PredictionsController < ApplicationController
   end
 
   def prediction_params
-    params.require(:prediction).permit(:betting_pool_id, :match_id, predicted_results_attributes: [ :id, :score ])
+    params.require(:prediction).permit(:betting_pool_id, :match_id, predicted_results_attributes: [ :id, :match_participant_id, :score ])
   end
 end

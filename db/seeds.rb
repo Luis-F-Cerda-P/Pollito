@@ -38,6 +38,7 @@ match = Match.find_or_create_by!(id: 1) do |match|
   match.round = 1
   match.stage = stage
   match.participants = participants
+  match.match_status = :bets_open
 end
 print "."
 

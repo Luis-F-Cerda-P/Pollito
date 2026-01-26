@@ -1,0 +1,20 @@
+<%# Local variables: progress (hash with :completed and :total keys) %>
+<% completed = progress[:completed] || 0 %>
+<% total = progress[:total] || 0 %>
+<% percentage = total > 0 ? (completed.to_f / total * 100).round : 0 %>
+
+<div class="flex items-center space-x-3">
+  <div class="text-sm text-gray-600">
+    <span class="font-semibold text-indigo-600"><%= completed %></span>
+    <span class="text-gray-400">/</span>
+    <span><%= total %></span>
+    <span class="text-gray-500">predictions</span>
+  </div>
+
+  <% if total > 0 %>
+    <div class="w-24 bg-gray-200 rounded-full h-2">
+      <div class="bg-indigo-600 h-2 rounded-full transition-all duration-300"
+           style="width: <%= percentage %>%"></div>
+    </div>
+  <% end %>
+</div>

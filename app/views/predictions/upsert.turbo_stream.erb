@@ -1,0 +1,16 @@
+<%# Replace the prediction form with updated state %>
+<%= turbo_stream.replace dom_id(@match, :prediction) do %>
+  <%= render "predictions/match_prediction_form",
+              match: @match,
+              prediction: @prediction,
+              betting_pool: @betting_pool %>
+<% end %>
+
+<%# Also update the chronological view if it exists %>
+<%= turbo_stream.replace dom_id(@match, :prediction_chrono) do %>
+  <%= render "predictions/match_prediction_form",
+              match: @match,
+              prediction: @prediction,
+              betting_pool: @betting_pool,
+              show_stage: true %>
+<% end %>

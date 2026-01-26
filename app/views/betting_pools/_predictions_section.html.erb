@@ -1,0 +1,88 @@
+<div class="bg-white shadow-md rounded-lg" data-controller="predictions-list">
+  <div class="px-6 py-4 border-b border-gray-200">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <h2 class="text-xl font-semibold text-gray-900">Make Your Predictions</h2>
+      <%= render "predictions/progress_indicator", progress: @prediction_progress %>
+    </div>
+
+    <!-- View toggle and filter controls -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4">
+      <!-- View toggle: By Stage | Chronological -->
+      <div class="flex space-x-2">
+        <button type="button"
+                data-predictions-list-target="stageTab"
+                data-action="click->predictions-list#showByStage"
+                class="px-4 py-2 text-sm font-medium rounded-lg bg-indigo-600 text-white transition-colors duration-200">
+          By Stage
+        </button>
+        <button type="button"
+                data-predictions-list-target="chronoTab"
+                data-action="click->predictions-list#showChronological"
+                class="px-4 py-2 text-sm font-medium rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors duration-200">
+          Chronological
+        </button>
+      </div>
+
+      <!-- Filter: checkbox to hide closed matches -->
+      <label class="inline-flex items-center cursor-pointer">
+        <input type="checkbox"
+               data-predictions-list-target="closedToggle"
+               data-action="change->predictions-list#toggleClosed"
+               class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
+        <span class="ml-2 text-sm text-gray-600">Hide closed matches</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="p-6">
+    <% if @matches_by_stage.any? %>
+      <!-- By Stage view -->
+      <div data-predictions-list-target="byStage">
+        <% @matches_by_stage.each do |stage, matches| %>
+          <section class="mb-8 last:mb-0">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">
+              <%= stage.name %>
+            </h3>
+            <div class="space-y-4">
+              <% matches.each do |match| %>
+                <div data-predictions-list-target="matchItem" data-match-status="<%= match.match_status %>">
+                  <%= turbo_frame_tag dom_id(match, :prediction) do %>
+                    <%= render "predictions/match_prediction_form",
+                                match: match,
+                                prediction: @user_predictions[match.id],
+                                betting_pool: @betting_pool %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </section>
+        <% end %>
+      </div>
+
+      <!-- Chronological view (hidden by default) -->
+      <div data-predictions-list-target="chronological" class="hidden">
+        <div class="space-y-4">
+          <% @matches_chronological.each do |match| %>
+            <div data-predictions-list-target="matchItem" data-match-status="<%= match.match_status %>">
+              <%= turbo_frame_tag dom_id(match, :prediction_chrono) do %>
+                <%= render "predictions/match_prediction_form",
+                            match: match,
+                            prediction: @user_predictions[match.id],
+                            betting_pool: @betting_pool,
+                            show_stage: true %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <div class="text-gray-500 text-lg">No matches available yet</div>
+        <p class="text-gray-400 mt-2">Check back when matches are added to the tournament.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
