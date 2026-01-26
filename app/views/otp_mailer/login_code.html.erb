@@ -1,0 +1,13 @@
+<h1>Your Login Code</h1>
+
+<p>Hi <%= @user.name %>,</p>
+
+<p>Your login code for Pollito is:</p>
+
+<p style="font-size: 32px; font-weight: bold; letter-spacing: 8px; font-family: monospace;">
+  <%= @otp %>
+</p>
+
+<p>This code will expire in 15 minutes.</p>
+
+<p>If you didn't request this code, you can safely ignore this email.</p>
