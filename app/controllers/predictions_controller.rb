@@ -15,7 +15,7 @@ class PredictionsController < ApplicationController
           )
           .order(created_at: :desc)
     else
-      redirect_to new_session_path, alert: "Please sign in to view your predictions."
+      redirect_to login_path, alert: "Please sign in to view your predictions."
     end
   end
 
