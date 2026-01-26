@@ -103,8 +103,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
   create_table "predicted_results", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "match_participant_id", null: false
+    t.integer "points"
     t.integer "prediction_id", null: false
-    t.integer "score", null: false
+    t.integer "score"
     t.datetime "updated_at", null: false
     t.index ["match_participant_id"], name: "index_predicted_results_on_match_participant_id"
     t.index ["prediction_id", "match_participant_id"], name: "index_predicted_results_on_prediction_and_participant", unique: true
@@ -115,6 +116,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
     t.bigint "betting_pool_id", null: false
     t.datetime "created_at", null: false
     t.bigint "match_id", null: false
+    t.integer "outcome_points"
+    t.integer "total_points"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["betting_pool_id", "match_id", "user_id"], name: "index_predictions_on_user_pool_match", unique: true
