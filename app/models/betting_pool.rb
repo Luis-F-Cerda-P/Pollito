@@ -10,6 +10,11 @@ class BettingPool < ApplicationRecord
   validates :name, presence: true
   validates :name, uniqueness: { scope: :event_id, message: "must be unique within this event" }
 
+  scope :visible_to, ->(user) {
+    where(is_public: true)
+      .or(where(id: user.joined_pools.select(:id)))
+  }
+
   after_create :add_creator_to_members
 
   def add_user(user)
