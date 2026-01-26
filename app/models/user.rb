@@ -1,5 +1,5 @@
 class User < ApplicationRecord
-  has_secure_password
+  has_secure_password validations: false
   has_many :sessions, dependent: :destroy
   has_many :betting_pools, foreign_key: :creator_id, dependent: :destroy
   has_many :betting_pool_memberships, dependent: :destroy
@@ -7,6 +7,14 @@ class User < ApplicationRecord
   has_many :predictions, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
+
+  validates :password, presence: true, if: :admin?
+
+  def self.find_or_create_from_verification!(verification)
+    find_or_create_by!(email_address: verification.email_address) do |user|
+      user.name = verification.name
+    end
+  end
 
   def created_pools
     betting_pools
