@@ -1,11 +1,10 @@
-<% password_digest = BCrypt::Password.create("password") %>
-
 admin_user:
-  email_address: <%= Rails.application.credentials.dig("seed_user", "email_address") %>
-  password_digest: <%= BCrypt::Password.create(Rails.application.credentials.dig("seed_user", "password")) %>
+  email_address: admin@pollito.com
+  name: Admin User
+  password_digest: <%= BCrypt::Password.create("password123") %>
   admin: true
 
 regular_user:
   email_address: alguien@pollito.com
-  password_digest: <%= password_digest %>
+  name: Regular User
   admin: false

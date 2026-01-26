@@ -10,6 +10,7 @@
 print "Seeding primary database"
 user = User.find_or_create_by!(email_address: Rails.application.credentials.dig("seed_user", "email_address")) do |user|
   user.password = Rails.application.credentials.dig("seed_user", "password")
+  user.name = Rails.application.credentials.dig("seed_user", "name")
   user.admin = true
 end
 print "."
