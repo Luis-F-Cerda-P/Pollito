@@ -2,7 +2,7 @@ class PredictedResult < ApplicationRecord
   belongs_to :prediction
   belongs_to :match_participant
 
-  validates :score, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :score, numericality: { in: 0..9 }, allow_nil: true
   validates :match_participant_id, uniqueness: { scope: :prediction_id }
 
   validate :match_participant_must_belong_to_prediction_match
