@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_25_000001) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -61,6 +61,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
     t.index ["creator_id"], name: "index_betting_pools_on_creator_id"
     t.index ["event_id", "creator_id"], name: "index_betting_pools_on_event_id_and_creator_id"
     t.index ["event_id"], name: "index_betting_pools_on_event_id"
+  end
+
+  create_table "email_verifications", force: :cascade do |t|
+    t.integer "attempts", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.string "email_address", null: false
+    t.datetime "expires_at", null: false
+    t.string "name"
+    t.string "otp_digest", null: false
+    t.integer "purpose", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["email_address"], name: "index_email_verifications_on_email_address"
+    t.index ["expires_at"], name: "index_email_verifications_on_expires_at"
   end
 
   create_table "events", force: :cascade do |t|
@@ -157,7 +170,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_21_224350) do
     t.boolean "admin", default: false, null: false
     t.datetime "created_at", null: false
     t.string "email_address", null: false
-    t.string "password_digest", null: false
+    t.string "name", null: false
+    t.string "password_digest"
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
