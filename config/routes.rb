@@ -1,7 +1,21 @@
 Rails.application.routes.draw do
   get "pages/home"
-  resource :session
-  resources :passwords, param: :token
+
+  # Login (handles both admin password and regular OTP)
+  get  "login",                 to: "otp_sessions#new"
+  post "login",                 to: "otp_sessions#create"
+  get  "login/password",        to: "otp_sessions#password",    as: :login_password
+  post "login/password",        to: "otp_sessions#authenticate"
+  get  "login/verify/:token",   to: "otp_sessions#verify",      as: :login_verify
+  post "login/verify/:token",   to: "otp_sessions#confirm"
+  delete "logout",              to: "otp_sessions#destroy"
+
+  # Registration
+  get  "signup",                to: "registrations#new"
+  post "signup",                to: "registrations#create"
+  get  "signup/verify/:token",  to: "registrations#verify",     as: :signup_verify
+  post "signup/verify/:token",  to: "registrations#confirm"
+
   resources :participants
   resources :matches
   resources :events
