@@ -1,0 +1,11 @@
+brazil_vs_argentina:
+  stage: group_stage
+  match_date: <%= 7.days.from_now %>
+  match_type: 0
+  round: 1
+
+germany_vs_france:
+  stage: group_stage
+  match_date: <%= 7.days.from_now %>
+  match_type: 0
+  round: 1

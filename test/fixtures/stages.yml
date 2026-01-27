@@ -1,0 +1,7 @@
+group_stage:
+  event: world_cup
+  name: Group Stage
+
+knockout_stage:
+  event: world_cup
+  name: Knockout Stage

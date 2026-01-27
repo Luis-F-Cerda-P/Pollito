@@ -1,0 +1,15 @@
+brazil_in_match:
+  match: brazil_vs_argentina
+  participant: brazil
+
+argentina_in_match:
+  match: brazil_vs_argentina
+  participant: argentina
+
+germany_in_match:
+  match: germany_vs_france
+  participant: germany
+
+france_in_match:
+  match: germany_vs_france
+  participant: france
