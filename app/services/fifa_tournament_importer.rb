@@ -96,7 +96,8 @@ class FifaTournamentImporter
       # Using round (MatchNumber) as unique identifier within event
       match = Match.find_or_initialize_by(
         stage: stage,
-        round: match_data["MatchNumber"]
+        round: match_data["MatchNumber"],
+        match_type: :one_on_one
       )
 
       is_new = match.new_record?

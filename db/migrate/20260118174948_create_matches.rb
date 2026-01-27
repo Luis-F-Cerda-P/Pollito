@@ -4,6 +4,7 @@ class CreateMatches < ActiveRecord::Migration[8.0]
       t.bigint :stage_id, null: false
       t.datetime :match_date, null: true
       t.integer :match_status, null: true
+      t.integer :match_type, null: true
       t.integer :round
 
       t.timestamps

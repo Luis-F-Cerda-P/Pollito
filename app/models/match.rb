@@ -16,6 +16,7 @@ class Match < ApplicationRecord
   # (at the time of time of this comment, the Result model is planned but not yet implemented, so the 'final' flag on them could eventually not exist);
   # a 'finished' match is done, closed for modification
   enum :match_status, { unset: 0, bets_open: 1, bets_closed: 2, in_progress: 3, finished: 4 }, allow_nil: true
+  enum :match_type, { one_on_one: 0, multi_nominee: 1 }
 
   validates :match_date, presence: true
   validates :round, presence: true, numericality: { greater_than: 0 }
