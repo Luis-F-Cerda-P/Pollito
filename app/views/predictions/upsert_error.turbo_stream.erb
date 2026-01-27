@@ -1,5 +1,6 @@
 <%# Replace form with error state - the form will show the error inline %>
 <%= turbo_stream.replace dom_id(@match, :prediction) do %>
+  <%= turbo_frame_tag dom_id(@match, :prediction) do %>
   <div class="border border-red-300 rounded-lg p-4 bg-red-50"
        data-controller="prediction-form"
        data-prediction-form-match-status-value="<%= @match.match_status %>">
@@ -62,4 +63,5 @@
       </div>
     <% end %>
   </div>
+  <% end %>
 <% end %>

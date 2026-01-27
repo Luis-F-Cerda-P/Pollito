@@ -2,7 +2,9 @@
   <div class="px-6 py-4 border-b border-gray-200">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <h2 class="text-xl font-semibold text-gray-900">Make Your Predictions</h2>
-      <%= render "predictions/progress_indicator", progress: @prediction_progress %>
+      <div id="prediction-progress">
+        <%= render "predictions/progress_indicator", progress: @prediction_progress %>
+      </div>
     </div>
 
     <!-- View toggle and filter controls -->
