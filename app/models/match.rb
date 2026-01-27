@@ -77,6 +77,17 @@ class Match < ApplicationRecord
   end
 
   def stage_betting_cutoff_time
-    stage.start_time - DEFAULT_STAGE_BETTING_CUTOFF
+    return nil unless effective_stage_start_time
+
+    effective_stage_start_time - DEFAULT_STAGE_BETTING_CUTOFF
+  end
+
+  def participants_ready?
+    match_participants.reject(&:marked_for_destruction?).size >= 2
+  end
+
+  def effective_stage_start_time
+    times = [ stage.persisted_start_time, match_date ].compact
+    times.min
   end
 end
