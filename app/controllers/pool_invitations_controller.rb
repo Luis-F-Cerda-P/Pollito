@@ -6,7 +6,7 @@ class PoolInvitationsController < ApplicationController
   def show
     if @betting_pool.user_in_pool?(Current.user)
       redirect_to @betting_pool, notice: "You're already a member of this pool."
-      return
+      nil
     end
   end
 

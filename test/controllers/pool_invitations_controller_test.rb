@@ -93,5 +93,4 @@ class PoolInvitationsControllerTest < ActionDispatch::IntegrationTest
     post accept_pool_invitation_url(@private_pool.invite_code)
     assert_redirected_to login_path
   end
-
 end
