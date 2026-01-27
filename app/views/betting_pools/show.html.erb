@@ -125,6 +125,39 @@
     </div>
     <!-- Sidebar -->
     <div class="lg:col-span-1">
+      <% if @betting_pool.creator == Current.user && !@betting_pool.is_public %>
+        <!-- Invite Link Section -->
+        <div class="bg-white shadow-md rounded-lg mb-6">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">Invite Link</h2>
+          </div>
+          <div class="p-6">
+            <% if @betting_pool.invite_valid? %>
+              <p class="text-sm text-gray-600 mb-3">Share this link to invite people to your pool:</p>
+              <div class="flex space-x-2">
+                <input type="text"
+                       readonly
+                       value="<%= join_pool_url(@betting_pool.invite_code) %>"
+                       class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-700"
+                       id="invite-link-input" />
+                <button type="button"
+                        onclick="navigator.clipboard.writeText(document.getElementById('invite-link-input').value); this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy', 2000);"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors duration-200">
+                  Copy
+                </button>
+              </div>
+            <% else %>
+              <div class="flex items-center text-amber-600">
+                <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                <span class="text-sm">Invite link has expired (event ended).</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
       <!-- Members List -->
       <div class="bg-white shadow-md rounded-lg">
         <div class="px-6 py-4 border-b border-gray-200">

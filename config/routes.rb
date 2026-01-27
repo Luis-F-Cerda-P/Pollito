@@ -16,6 +16,10 @@ Rails.application.routes.draw do
   get  "signup/verify/:token",  to: "registrations#verify",     as: :signup_verify
   post "signup/verify/:token",  to: "registrations#confirm"
 
+  # Pool invite links
+  get "join/:invite_code", to: "pool_invitations#show", as: :join_pool
+  post "join/:invite_code", to: "pool_invitations#accept", as: :accept_pool_invitation
+
   resources :participants
   resources :matches
   resources :events

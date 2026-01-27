@@ -1,0 +1,40 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-lg mx-auto">
+    <div class="bg-white shadow-md rounded-lg">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h1 class="text-2xl font-semibold text-gray-900">You're Invited!</h1>
+      </div>
+      <div class="p-6 space-y-6">
+        <div class="text-center">
+          <p class="text-gray-600 mb-4">You've been invited to join a betting pool:</p>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2"><%= @betting_pool.name %></h2>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+            Private Pool
+          </span>
+        </div>
+
+        <div class="border-t border-gray-200 pt-6 space-y-4">
+          <div class="flex justify-between">
+            <span class="text-sm font-medium text-gray-500">Event</span>
+            <span class="text-sm text-gray-900"><%= @betting_pool.event.name %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm font-medium text-gray-500">Created by</span>
+            <span class="text-sm text-gray-900"><%= @betting_pool.creator.name %></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-sm font-medium text-gray-500">Members</span>
+            <span class="text-sm text-gray-900"><%= @betting_pool.member_count %></span>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-200 pt-6">
+          <%= form_with url: accept_pool_invitation_path(@betting_pool.invite_code), method: :post, class: "space-y-4" do %>
+            <%= submit_tag "Join this pool", class: "w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 cursor-pointer" %>
+          <% end %>
+          <%= link_to "Cancel", root_path, class: "block text-center text-gray-600 hover:text-gray-900 text-sm" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
