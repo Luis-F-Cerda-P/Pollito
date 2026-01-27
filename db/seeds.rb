@@ -59,3 +59,27 @@ bettable_matches.each do |match|
 end
 
 puts " Success!"
+
+# Import Oscar nominations from HTML
+print "Seeding Oscar nominations"
+
+html_path = Rails.root.join("storage", "nominations.html")
+html_content = File.read(html_path)
+oscar_importer = OscarNominationsImporter.new(html_content)
+oscar_stats = oscar_importer.import!
+print "."
+
+puts "\n  Oscar import stats: #{oscar_stats.inspect}"
+
+# Get the imported Oscar event
+oscar_event = Event.find_by!(name: "98th Academy Awards")
+print "."
+
+# Create betting pool for the Oscars
+oscar_pool = BettingPool.find_or_create_by!(name: "Oscar Pool 2026", event: oscar_event) do |pool|
+  pool.creator = user
+  pool.is_public = true
+end
+print "."
+
+puts " Success!"
