@@ -3,6 +3,8 @@ class FifaTournamentImporter
     @data = json_data
     @stats = {
       event: nil,
+      stages_created: 0,
+      stages_updated: 0,
       participants_created: 0,
       participants_updated: 0,
       matches_created: 0,
@@ -13,6 +15,7 @@ class FifaTournamentImporter
   def import!
     ActiveRecord::Base.transaction do
       create_or_update_event
+      import_stages
       import_participants
       import_matches
     end
@@ -48,6 +51,21 @@ class FifaTournamentImporter
     end
   end
 
+  def import_stages
+    stages = extract_unique_stages
+
+    stages.each do |stage_data|
+      stage = Stage.find_or_initialize_by(name: stage_data[:name], event: @event)
+
+      if stage.new_record?
+        stage.save!
+        @stats[:stages_created] += 1
+      else
+        @stats[:stages_updated] += 1
+      end
+    end
+  end
+
   def import_participants
     teams = extract_unique_teams
 
@@ -72,18 +90,19 @@ class FifaTournamentImporter
       # Extract match date
       match_date = DateTime.parse(match_data["Date"])
 
+      stage = Stage.find_by!(event: @event, name: match_data["StageName"].first["Description"])
+
       # Find or create match by event + date + round
       # Using round (MatchNumber) as unique identifier within event
       match = Match.find_or_initialize_by(
-        event: @event,
+        stage: stage,
         round: match_data["MatchNumber"]
       )
 
       is_new = match.new_record?
 
       match.assign_attributes(
-        match_date: match_date,
-        match_status: map_status(match_data["MatchStatus"])
+        match_date: match_date
       )
 
       match.save!
@@ -97,12 +116,28 @@ class FifaTournamentImporter
         create_match_participant(match, away_team["TeamName"].first["Description"])
       end
 
+      match.save!  # Triggers before_validation to set status based on participants
+
       if is_new
         @stats[:matches_created] += 1
       else
         @stats[:matches_updated] += 1
       end
     end
+  end
+
+  def extract_unique_stages
+    stages = []
+
+    @data["Results"].each do |match|
+      if match["StageName"]
+        stages << {
+          name: match["StageName"].first["Description"]
+        }
+      end
+    end
+
+    stages.uniq { |t| t[:name] }
   end
 
   def extract_unique_teams
@@ -133,16 +168,5 @@ class FifaTournamentImporter
       match: match,
       participant: participant
     )
-  end
-
-  def map_status(fifa_status)
-    # FIFA's MatchStatus: 1 = scheduled, others TBD based on their docs
-    # Adjust this mapping based on your enum values
-    case fifa_status
-    when 1 then 0 # scheduled
-    when 2 then 1 # in_progress
-    when 3 then 2 # completed
-    else 0 # default to scheduled
-    end
   end
 end
