@@ -1,20 +1,47 @@
 module Prediction::Scorable
   # TODO: Make this whole process be scoped to a specific betting pool, so reports can be sent when each betting pool has been recalculated
+
+  # One-on-one scoring
   EXACT_SCORE_POINTS = 2
   CORRECT_OUTCOME_POINTS = 3
+
+  # Multi-nominee scoring
+  CORRECT_WINNER_POINTS = 5
 
   def calculate_score!
     return unless match.finished?
 
     transaction do
-      calculate_participant_scores!
-      calculate_outcome_points!
-      calculate_total_score!
+      if match.multi_nominee?
+        calculate_multi_nominee_score!
+      else
+        calculate_one_on_one_score!
+      end
       update_membership_scores!
     end
   end
 
   private
+
+  def calculate_one_on_one_score!
+    calculate_participant_scores!
+    calculate_outcome_points!
+    calculate_total_score!
+  end
+
+  def calculate_multi_nominee_score!
+    # For multi-nominee: only award points for picking the correct winner
+    actual_winner_mp_id = match.outcome
+    predicted_winner_mp_id = predicted_outcome
+
+    points = (actual_winner_mp_id == predicted_winner_mp_id) ? CORRECT_WINNER_POINTS : 0
+
+    # Clear any participant-level points (not used for multi-nominee)
+    predicted_results.update_all(points: 0)
+
+    # Store as outcome_points and total_points
+    update!(outcome_points: points, total_points: points)
+  end
 
   def calculate_participant_scores!
     predicted_results.each do |predicted_result|

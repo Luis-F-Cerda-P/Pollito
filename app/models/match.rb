@@ -30,7 +30,11 @@ class Match < ApplicationRecord
   scope :bets_closed_or_later, -> { where(match_status: [ :bets_closed, :in_progress, :finished ]) }
 
   def display_name
-    participants.map(&:name).join(" vs. ")
+    if multi_nominee?
+      participants.map(&:name).join(", ")
+    else
+      participants.map(&:name).join(" vs. ")
+    end
   end
 
   def outcome
@@ -39,10 +43,20 @@ class Match < ApplicationRecord
     scores = results.pluck(:match_participant_id, :score).to_h
     return nil if scores.empty?
 
-    max_score = scores.values.max
-    winners = scores.select { |_, score| score == max_score }
+    if multi_nominee?
+      # Multi-nominee: winner has score=1, others have score=0
+      winner = scores.find { |_, score| score == 1 }
+      winner&.first
+    else
+      # One-on-one: highest score wins, ties = draw
+      max_score = scores.values.max
+      winners = scores.select { |_, score| score == max_score }
+      winners.count > 1 ? :draw : winners.keys.first
+    end
+  end
 
-    winners.count > 1 ? :draw : winners.keys.first
+  def allows_draw?
+    one_on_one?
   end
 
   def mark_as_final!
