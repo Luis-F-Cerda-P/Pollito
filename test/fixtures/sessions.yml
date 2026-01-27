@@ -1,0 +1,9 @@
+admin_session:
+  user: admin_user
+  user_agent: Test Browser
+  ip_address: 127.0.0.1
+
+regular_session:
+  user: regular_user
+  user_agent: Test Browser
+  ip_address: 127.0.0.1

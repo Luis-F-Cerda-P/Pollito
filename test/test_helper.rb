@@ -13,3 +13,18 @@ module ActiveSupport
     # Add more helper methods to be used by all tests here...
   end
 end
+
+module SignInHelper
+  def sign_in_as(user)
+    verification, otp = EmailVerification.create_for(
+      email_address: user.email_address,
+      purpose: :login
+    )
+
+    post login_verify_url(token: verification.id, otp: otp)
+  end
+end
+
+class ActionDispatch::IntegrationTest
+  include SignInHelper
+end

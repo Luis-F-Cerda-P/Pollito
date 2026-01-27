@@ -1,0 +1,20 @@
+private_pool:
+  name: Private Test Pool
+  event: world_cup
+  creator: admin_user
+  is_public: false
+  invite_code: abc12345
+
+public_pool:
+  name: Public Test Pool
+  event: world_cup
+  creator: admin_user
+  is_public: true
+  invite_code: xyz98765
+
+expired_pool:
+  name: Expired Pool
+  event: past_event
+  creator: admin_user
+  is_public: false
+  invite_code: exp12345

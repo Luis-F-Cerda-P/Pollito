@@ -1,0 +1,9 @@
+world_cup:
+  name: FIFA World Cup 2026
+  start_date: <%= Date.current + 30.days %>
+  end_date: <%= Date.current + 60.days %>
+
+past_event:
+  name: Past Championship
+  start_date: <%= Date.current - 60.days %>
+  end_date: <%= Date.current - 30.days %>

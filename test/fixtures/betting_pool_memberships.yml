@@ -1,0 +1,14 @@
+admin_in_private_pool:
+  betting_pool: private_pool
+  user: admin_user
+  score: 0
+
+admin_in_public_pool:
+  betting_pool: public_pool
+  user: admin_user
+  score: 0
+
+admin_in_expired_pool:
+  betting_pool: expired_pool
+  user: admin_user
+  score: 0
