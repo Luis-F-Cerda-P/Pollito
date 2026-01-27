@@ -106,7 +106,10 @@ class PredictionsController < ApplicationController
     # For new predictions, nested attributes from form will create them
     @prediction.predicted_results.load unless @prediction.new_record?
 
-    if @prediction.update(prediction_params)
+    # Build the appropriate params based on match type
+    effective_params = @match.multi_nominee? ? build_multi_nominee_params : prediction_params
+
+    if @prediction.update(effective_params)
       @prediction.reload  # Ensure fresh state with correct IDs for Turbo Stream re-render
 
       # Calculate progress for Turbo Stream update
@@ -138,5 +141,19 @@ class PredictionsController < ApplicationController
 
   def prediction_params
     params.require(:prediction).permit(:betting_pool_id, :match_id, predicted_results_attributes: [ :id, :match_participant_id, :score ])
+  end
+
+  def build_multi_nominee_params
+    winner_mp_id = params[:predicted_winner_mp_id].to_i
+    base_params = params.require(:prediction).permit(predicted_results_attributes: [ :id, :match_participant_id ])
+
+    # Set score=1 for winner, score=0 for others
+    if base_params[:predicted_results_attributes].present?
+      base_params[:predicted_results_attributes].each do |_, attrs|
+        attrs[:score] = (attrs[:match_participant_id].to_i == winner_mp_id) ? 1 : 0
+      end
+    end
+
+    base_params
   end
 end
