@@ -102,14 +102,18 @@ class PredictionsController < ApplicationController
       match: @match
     )
 
-    # Build predicted_results if new
-    if @prediction.new_record?
-      @match.match_participants.each do |mp|
-        @prediction.predicted_results.build(match_participant: mp)
-      end
-    end
+    # Load predicted_results for existing predictions to ensure correct ID handling
+    # For new predictions, nested attributes from form will create them
+    @prediction.predicted_results.load unless @prediction.new_record?
 
     if @prediction.update(prediction_params)
+      @prediction.reload  # Ensure fresh state with correct IDs for Turbo Stream re-render
+
+      # Calculate progress for Turbo Stream update
+      open_matches = @betting_pool.event.matches.bets_open
+      user_predictions = @betting_pool.predictions.where(user: Current.user, match: open_matches)
+      @prediction_progress = { completed: user_predictions.count, total: open_matches.count }
+
       respond_to do |format|
         format.turbo_stream
         format.html { redirect_to @betting_pool }
