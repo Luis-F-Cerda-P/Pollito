@@ -38,3 +38,6 @@
 
 # Ignore node_modules 
 /node_modules/
+
+# Ignore Simplecov's coverage directory
+coverage
