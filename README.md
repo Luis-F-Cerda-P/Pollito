@@ -1,63 +1,69 @@
-# Pollito - World Cup Betting Pool
+# Pollito - Betting Pool Platform
 
-A modern, interactive web application for creating and managing World Cup betting pools among friends and colleagues.
+A modern, interactive web application for creating and managing betting pools for major events like the FIFA World Cup and the Academy Awards.
 
 ## Overview
 
 Pollito is a Ruby on Rails 8 application that enables users to:
-- Create private betting pools for the 2026 FIFA World Cup
-- Make predictions on matches before they start
+- Create public or private betting pools for major events
+- Make predictions on matches and award categories
 - Track scores and compete on leaderboards
 - Manage multiple pools with different groups of people
+
+### Supported Events
+
+- **FIFA World Cup 2026** - Score-based predictions for football matches
+- **Academy Awards (Oscars)** - Winner predictions for award categories
 
 ## Tech Stack
 
 **Backend:**
-- Ruby 3.3.5 with Rails 8.0.3
-- PostgreSQL database with SQLite for development
+- Ruby 3.3.5 with Rails 8.1.2
+- SQLite for all environments (dev/test/prod)
 - Solid Suite (Cache, Queue, Cable) for background services
-- Authentication with secure password handling
+- Passwordless OTP authentication (6-digit codes via email)
 
 **Frontend:**
 - Hotwire (Turbo + Stimulus) for SPA-like experience
 - Tailwind CSS for modern, responsive design
 - Flowbite UI components
-- Import Maps for JavaScript management
+- Import Maps for JavaScript (no Node.js build step)
 
 **Infrastructure:**
 - Docker containerization
 - Kamal for zero-downtime deployments
 - Puma with Thruster for HTTP acceleration
-- Let's Encrypt SSL auto-certification
 
 ## Key Features
 
-### Core Models
-- **Users**: Secure authentication with session management
-- **Events**: Tournament management (World Cup 2026)
-- **Teams**: National team information
-- **Matches**: Complete match schedule with scores
-- **Betting Pools**: Private prediction groups
-- **Predictions**: User forecasts with scoring system
+### Match Types
+- **One-on-One** (Sports): Predict scores for two-team matches
+- **Multi-Nominee** (Awards): Pick winners from multiple nominees
 
 ### Scoring System
-- **Exact Score**: 3 points
-- **Correct Outcome**: 1 point
+- **Exact Score Match**: 2 points per correct score (sports)
+- **Correct Outcome** (win/draw): 3 points (sports)
+- **Correct Winner**: 5 points (awards)
 - Real-time leaderboard updates
 - Pool-specific rankings
 
-### Caching Strategy
-- Fragment caching for leaderboards
-- Russian doll caching for match results
-- Low-level cache for expensive calculations
-- Optimized for high concurrent traffic
+### Match Status Lifecycle
+1. `unset` - Participants not yet determined
+2. `bets_open` - Predictions allowed
+3. `bets_closed` - Stage deadline reached (12h before first match)
+4. `in_progress` - Match underway
+5. `finished` - Match complete, scores calculated
+
+### Authentication
+- Passwordless email authentication with OTP codes
+- 6-digit codes sent via email, valid for 15 minutes
+- 5-attempt limit for security
+- Admin users can also use password authentication
 
 ## Getting Started
 
 ### Prerequisites
 - Ruby 3.3.5+
-- Node.js 18+
-- PostgreSQL 14+ (production)
 
 ### Installation
 
@@ -70,7 +76,6 @@ cd pollito
 2. Install dependencies
 ```bash
 bundle install
-npm install
 ```
 
 3. Setup database
@@ -86,12 +91,32 @@ bin/dev
 ### Development Commands
 
 ```bash
-bin/rails server              # Start Rails server
-bin/rails console             # Rails console
-bin/rails test               # Run test suite
-bin/rubocop                  # Code linting
-bin/brakeman                 # Security scanning
-bin/rails tailwindcss:watch  # Compile CSS
+bin/dev                       # Start all services (Rails + Tailwind watcher)
+bin/rails server              # Rails server only
+bin/rails console             # Interactive Rails console
+bin/rails test                # Run test suite
+bin/rails test:system         # Run system tests
+bin/rubocop                   # Ruby linting
+bin/rubocop -a                # Auto-fix style issues
+bin/brakeman                  # Security vulnerability scan
+bin/rails tailwindcss:watch   # Compile CSS in watch mode
+```
+
+## Data Import
+
+### FIFA World Cup
+Import tournament data from FIFA JSON:
+```bash
+# Via admin interface at /admin/tournaments
+# Or via Rails console:
+FifaTournamentImporter.new(json_data).import!
+```
+
+### Academy Awards
+Import Oscar nominations from HTML:
+```bash
+# Via Rails console:
+OscarNominationsImporter.new(html_content).import!
 ```
 
 ## Testing
@@ -101,43 +126,35 @@ Run the complete test suite:
 bin/rails test
 ```
 
-Run system tests:
+Run system tests (Capybara + Selenium):
 ```bash
 bin/rails test:system
 ```
 
 ## Deployment
 
-Pollito is designed for easy deployment with Kamal:
+Pollito is designed for deployment with Kamal:
 
 ```bash
 bin/kamal deploy              # Deploy to production
-bin/kamal app logs           # View application logs
-bin/kamal app console        # Access production console
+bin/kamal app logs            # View application logs
+bin/kamal app console         # Access production console
 ```
 
 ## Code Quality
 
-- **RuboCop**: Enforces Ruby style guide
-- **Brakeman**: Security vulnerability scanning  
-- **Rails Testing**: Comprehensive test coverage
-- **Code Review**: Pull-based development workflow
-
-## Performance
-
-- Optimized for 50+ concurrent users
-- Multi-level caching strategy
-- Efficient database queries
-- Background job processing
-- HTTP acceleration with Thruster
+- **RuboCop**: Enforces Rails Omakase style guide
+- **Brakeman**: Security vulnerability scanning
+- **Import Map Audit**: JavaScript dependency security
+- **CI/CD**: GitHub Actions for automated testing
 
 ## Security
 
-- Secure password hashing with bcrypt
+- Bcrypt password hashing (admin accounts)
+- OTP codes hashed with bcrypt
 - CSRF protection
-- Parameter validation
-- SQL injection prevention
-- Regular security scanning
+- Session-based authentication with secure cookies
+- SQL injection prevention via ActiveRecord
 
 ## Contributing
 
@@ -153,68 +170,74 @@ This project is licensed under the MIT License.
 
 ---
 
-# Pollito - Quiniela del Mundial
+# Pollito - Plataforma de Quinielas
 
-Una aplicación web moderna e interactiva para crear y gestionar quinielas del Mundial entre amigos y colegas.
+Una aplicacion web moderna e interactiva para crear y gestionar quinielas de eventos importantes como el Mundial de Futbol FIFA y los Premios de la Academia.
 
 ## Resumen
 
-Pollito es una aplicación Ruby on Rails 8 que permite a los usuarios:
-- Crear quinielas privadas para el Mundial FIFA 2026
-- Hacer predicciones sobre partidos antes de que comiencen
+Pollito es una aplicacion Ruby on Rails 8 que permite a los usuarios:
+- Crear quinielas publicas o privadas para eventos importantes
+- Hacer predicciones sobre partidos y categorias de premios
 - Seguir puntajes y competir en tablas de posiciones
-- Gestionar múltiples quinielas con diferentes grupos
+- Gestionar multiples quinielas con diferentes grupos
 
-## Stack Tecnológico
+### Eventos Soportados
+
+- **Mundial FIFA 2026** - Predicciones de marcadores para partidos de futbol
+- **Premios de la Academia (Oscar)** - Predicciones de ganadores por categoria
+
+## Stack Tecnologico
 
 **Backend:**
-- Ruby 3.3.5 con Rails 8.0.3
-- PostgreSQL con SQLite para desarrollo
+- Ruby 3.3.5 con Rails 8.1.2
+- SQLite para todos los ambientes (dev/test/prod)
 - Solid Suite (Cache, Queue, Cable) para servicios en background
-- Autenticación con manejo seguro de contraseñas
+- Autenticacion sin contrasena con OTP (codigos de 6 digitos por email)
 
 **Frontend:**
 - Hotwire (Turbo + Stimulus) para experiencia tipo SPA
-- Tailwind CSS para diseño moderno y responsivo
+- Tailwind CSS para diseno moderno y responsivo
 - Componentes UI Flowbite
-- Import Maps para gestión de JavaScript
+- Import Maps para JavaScript (sin paso de compilacion Node.js)
 
 **Infraestructura:**
 - Contenedores Docker
 - Kamal para despliegues sin downtime
-- Puma con Thruster para aceleración HTTP
-- Auto-certificación SSL Let's Encrypt
+- Puma con Thruster para aceleracion HTTP
 
-## Características Principales
+## Caracteristicas Principales
 
-### Modelos Centrales
-- **Usuarios**: Autenticación segura con gestión de sesiones
-- **Eventos**: Gestión de torneos (Mundial 2026)
-- **Equipos**: Información de selecciones nacionales
-- **Partidos**: Calendario completo con resultados
-- **Quinielas**: Grupos privados de predicciones
-- **Predicciones**: Pronósticos de usuarios con sistema de puntuación
+### Tipos de Partidos/Competencias
+- **Uno contra Uno** (Deportes): Predecir marcadores para partidos de dos equipos
+- **Multi-Nominado** (Premios): Elegir ganadores entre multiples nominados
 
-### Sistema de Puntuación
-- **Resultado Exacto**: 3 puntos
-- **Resultado Correcto**: 1 punto
+### Sistema de Puntuacion
+- **Marcador Exacto**: 2 puntos por marcador correcto (deportes)
+- **Resultado Correcto** (victoria/empate): 3 puntos (deportes)
+- **Ganador Correcto**: 5 puntos (premios)
 - Actualizaciones en tiempo real de tablas
-- Rankings específicos por quiniela
+- Rankings especificos por quiniela
 
-### Estrategia de Caching
-- Fragment caching para tablas de posiciones
-- Russian doll caching para resultados de partidos
-- Low-level cache para cálculos costosos
-- Optimizado para alto tráfico concurrente
+### Ciclo de Estado de Partidos
+1. `unset` - Participantes aun no determinados
+2. `bets_open` - Predicciones permitidas
+3. `bets_closed` - Fecha limite de etapa alcanzada (12h antes del primer partido)
+4. `in_progress` - Partido en curso
+5. `finished` - Partido completado, puntajes calculados
+
+### Autenticacion
+- Autenticacion por email sin contrasena con codigos OTP
+- Codigos de 6 digitos enviados por email, validos por 15 minutos
+- Limite de 5 intentos por seguridad
+- Usuarios admin tambien pueden usar contrasena
 
 ## Comenzar
 
 ### Prerrequisitos
 - Ruby 3.3.5+
-- Node.js 18+
-- PostgreSQL 14+ (producción)
 
-### Instalación
+### Instalacion
 
 1. Clonar el repositorio
 ```bash
@@ -225,7 +248,6 @@ cd pollito
 2. Instalar dependencias
 ```bash
 bundle install
-npm install
 ```
 
 3. Configurar base de datos
@@ -241,12 +263,32 @@ bin/dev
 ### Comandos de Desarrollo
 
 ```bash
-bin/rails server              # Iniciar servidor Rails
-bin/rails console             # Consola Rails
-bin/rails test               # Ejecutar suite de pruebas
-bin/rubocop                  # Linting de código
-bin/brakeman                 # Escaneo de seguridad
-bin/rails tailwindcss:watch  # Compilar CSS
+bin/dev                       # Iniciar todos los servicios (Rails + Tailwind watcher)
+bin/rails server              # Solo servidor Rails
+bin/rails console             # Consola interactiva Rails
+bin/rails test                # Ejecutar suite de pruebas
+bin/rails test:system         # Ejecutar pruebas de sistema
+bin/rubocop                   # Linting de Ruby
+bin/rubocop -a                # Auto-corregir problemas de estilo
+bin/brakeman                  # Escaneo de vulnerabilidades
+bin/rails tailwindcss:watch   # Compilar CSS en modo watch
+```
+
+## Importacion de Datos
+
+### Mundial FIFA
+Importar datos del torneo desde JSON de FIFA:
+```bash
+# Via interfaz admin en /admin/tournaments
+# O via consola Rails:
+FifaTournamentImporter.new(json_data).import!
+```
+
+### Premios de la Academia
+Importar nominaciones del Oscar desde HTML:
+```bash
+# Via consola Rails:
+OscarNominationsImporter.new(html_content).import!
 ```
 
 ## Pruebas
@@ -256,43 +298,35 @@ Ejecutar suite completa de pruebas:
 bin/rails test
 ```
 
-Ejecutar pruebas de sistema:
+Ejecutar pruebas de sistema (Capybara + Selenium):
 ```bash
 bin/rails test:system
 ```
 
 ## Despliegue
 
-Pollito está diseñado para fácil despliegue con Kamal:
+Pollito esta disenado para despliegue con Kamal:
 
 ```bash
-bin/kamal deploy              # Desplegar a producción
-bin/kamal app logs           # Ver logs de aplicación
-bin/kamal app console        # Acceder a consola de producción
+bin/kamal deploy              # Desplegar a produccion
+bin/kamal app logs            # Ver logs de aplicacion
+bin/kamal app console         # Acceder a consola de produccion
 ```
 
-## Calidad de Código
+## Calidad de Codigo
 
-- **RuboCop**: Aplica guía de estilo Ruby
+- **RuboCop**: Aplica guia de estilo Rails Omakase
 - **Brakeman**: Escaneo de vulnerabilidades de seguridad
-- **Pruebas Rails**: Cobertura de pruebas comprehensiva
-- **Code Review**: Flujo de desarrollo basado en pull requests
-
-## Rendimiento
-
-- Optimizado para 50+ usuarios concurrentes
-- Estrategia multinivel de caching
-- Consultas de base de datos eficientes
-- Procesamiento de trabajos en background
-- Aceleración HTTP con Thruster
+- **Import Map Audit**: Seguridad de dependencias JavaScript
+- **CI/CD**: GitHub Actions para pruebas automatizadas
 
 ## Seguridad
 
-- Hash seguro de contraseñas con bcrypt
-- Protección CSRF
-- Validación de parámetros
-- Prevención de inyección SQL
-- Escaneo de seguridad regular
+- Hash de contrasenas con bcrypt (cuentas admin)
+- Codigos OTP hasheados con bcrypt
+- Proteccion CSRF
+- Autenticacion basada en sesiones con cookies seguras
+- Prevencion de inyeccion SQL via ActiveRecord
 
 ## Contribuir
 
@@ -304,4 +338,4 @@ bin/kamal app console        # Acceder a consola de producción
 
 ## Licencia
 
-Este proyecto está licenciado bajo la Licencia MIT.
+Este proyecto esta licenciado bajo la Licencia MIT.
