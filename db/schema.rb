@@ -55,12 +55,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_25_000001) do
     t.datetime "created_at", null: false
     t.bigint "creator_id", null: false
     t.bigint "event_id", null: false
+    t.string "invite_code", limit: 8
     t.boolean "is_public", default: false, null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["creator_id"], name: "index_betting_pools_on_creator_id"
     t.index ["event_id", "creator_id"], name: "index_betting_pools_on_event_id_and_creator_id"
     t.index ["event_id"], name: "index_betting_pools_on_event_id"
+    t.index ["invite_code"], name: "index_betting_pools_on_invite_code", unique: true
   end
 
   create_table "email_verifications", force: :cascade do |t|

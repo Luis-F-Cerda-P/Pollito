@@ -5,12 +5,14 @@ class CreateBettingPools < ActiveRecord::Migration[8.0]
       t.boolean :is_public, null: false, default: false
       t.bigint :event_id, null: false
       t.bigint :creator_id, null: false
+      t.string :invite_code, limit: 8
 
       t.timestamps
     end
 
     add_index :betting_pools, :event_id
     add_index :betting_pools, :creator_id
+    add_index :betting_pools, :invite_code, unique: true
     add_index :betting_pools, [ :event_id, :creator_id ]
 
     add_foreign_key :betting_pools, :events
