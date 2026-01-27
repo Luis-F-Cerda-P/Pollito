@@ -9,12 +9,14 @@ class BettingPool < ApplicationRecord
   validates :creator, presence: true
   validates :name, presence: true
   validates :name, uniqueness: { scope: :event_id, message: "must be unique within this event" }
+  validates :invite_code, presence: true, uniqueness: true, length: { is: 8 }
 
   scope :visible_to, ->(user) {
     where(is_public: true)
       .or(where(id: user.joined_pools.select(:id)))
   }
 
+  before_validation :generate_invite_code, on: :create
   after_create :add_creator_to_members
 
   def add_user(user)
@@ -43,7 +45,30 @@ class BettingPool < ApplicationRecord
     predictions.where(match: match)
   end
 
+  def invite_expired?
+    event.end_date.present? && event.end_date < Date.current
+  end
+
+  def invite_valid?
+    !invite_expired?
+  end
+
+  def regenerate_invite_code!
+    update!(invite_code: self.class.generate_unique_invite_code)
+  end
+
+  def self.generate_unique_invite_code
+    loop do
+      code = SecureRandom.alphanumeric(8).downcase
+      break code unless exists?(invite_code: code)
+    end
+  end
+
   private
+
+  def generate_invite_code
+    self.invite_code ||= self.class.generate_unique_invite_code
+  end
 
   def add_creator_to_members
     betting_pool_memberships.find_or_create_by!(user: creator)
