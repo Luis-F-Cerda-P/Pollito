@@ -1,0 +1,3 @@
+<%= turbo_stream.replace dom_id(@betting_pool) do %>
+  <%= render "pool_card", betting_pool: @betting_pool.reload %>
+<% end %>
