@@ -1,8 +1,9 @@
 class BettingPoolsController < ApplicationController
-  before_action :set_betting_pool, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_betting_pool, only: [ :show, :edit, :update, :destroy, :join ]
   before_action :require_authentication
   before_action :authorize_member!, only: [ :show ]
   before_action :authorize_creator!, only: [ :edit, :update, :destroy ]
+  before_action :authorize_public_pool!, only: [ :join ]
 
   def index
     @betting_pools = BettingPool.visible_to(Current.user)
@@ -81,6 +82,22 @@ class BettingPoolsController < ApplicationController
     redirect_to betting_pools_url, notice: "Betting pool was successfully deleted."
   end
 
+  def join
+    if @betting_pool.user_in_pool?(Current.user)
+      respond_to do |format|
+        format.html { redirect_to @betting_pool, notice: "You are already a member of this pool." }
+        format.turbo_stream { redirect_to @betting_pool, notice: "You are already a member of this pool." }
+      end
+      return
+    end
+
+    @betting_pool.add_user(Current.user)
+    respond_to do |format|
+      format.html { redirect_to @betting_pool, notice: "You have successfully joined the pool!" }
+      format.turbo_stream
+    end
+  end
+
   private
 
   def set_betting_pool
@@ -96,6 +113,12 @@ class BettingPoolsController < ApplicationController
   def authorize_creator!
     unless @betting_pool.creator == Current.user
       redirect_to @betting_pool, alert: "Only the pool creator can perform this action."
+    end
+  end
+
+  def authorize_public_pool!
+    unless @betting_pool.is_public
+      redirect_to betting_pools_path, alert: "You can only join public pools this way. Use an invite code for private pools."
     end
   end
 

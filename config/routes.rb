@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   resources :events
   resources :betting_pools do
     resources :betting_pool_memberships, shallow: true
+    post :join, on: :member
   end
   resources :predictions do
     collection do
