@@ -24,6 +24,8 @@
 # Ignore storage (uploaded files in development and any SQLite databases).
 /storage/*
 !/storage/.keep
+!/storage/tournament.json
+!/storage/nominations.html
 /tmp/storage/*
 !/tmp/storage/
 !/tmp/storage/.keep
