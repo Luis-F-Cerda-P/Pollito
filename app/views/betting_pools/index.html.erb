@@ -1,23 +1,20 @@
 <div class="container mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold text-gray-900">Betting Pools</h1>
-    <% if Current.user %>
-      <%= link_to "New Betting Pool", new_betting_pool_path,
-          class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
-    <% end %>
   </div>
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% if Current.user %>
+      <%= render "action_card" %>
+    <% end %>
     <% @betting_pools.each do |betting_pool| %>
       <%= render "pool_card", betting_pool: betting_pool %>
     <% end %>
   </div>
-  <% if @betting_pools.empty? %>
+  <% if @betting_pools.empty? && !Current.user %>
     <div class="text-center py-12">
       <div class="text-gray-500 text-lg mb-4">No betting pools found</div>
-      <% if Current.user %>
-        <%= link_to "Create your first betting pool", new_betting_pool_path,
-            class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
-      <% end %>
+      <%= link_to "Sign in to create a betting pool", login_path,
+          class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
     </div>
   <% end %>
 </div>
