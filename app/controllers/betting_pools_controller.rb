@@ -18,12 +18,13 @@ class BettingPoolsController < ApplicationController
       predicted_results: { match_participant: :participant }
     ).order(created_at: :desc).limit(10)
 
-    # Load matches for predictions section
+    # Load matches for predictions section, ordered by stage start time
     @matches_by_stage = @betting_pool.event.matches
                           .includes(:stage, match_participants: :participant)
-                          .joins(:stage)
-                          .order("stages.name", :match_date)
+                          .order(:match_date)
                           .group_by(&:stage)
+                          .sort_by { |stage, _matches| stage.persisted_start_time || Time.at(0) }
+                          .to_h
 
     @matches_chronological = @betting_pool.event.matches
                                .includes(:stage, match_participants: :participant)

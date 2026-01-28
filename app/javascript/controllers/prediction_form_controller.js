@@ -4,7 +4,8 @@ export default class extends Controller {
   static targets = ["form", "scoreInput", "loading", "status"]
   static values = {
     matchStatus: String,
-    debounceMs: { type: Number, default: 500 }
+    debounceMs: { type: Number, default: 500 },
+    submitDelayMs: { type: Number, default: 750 }
   }
 
   connect() {
@@ -56,15 +57,18 @@ export default class extends Controller {
     if (this.matchStatusValue !== "bets_open") return
 
     this.showLoading()
-    this.formTarget.requestSubmit()
+
+    // Delay submission so spinner is visible for a meaningful duration
+    // When Turbo response arrives, it replaces the element with fresh HTML
+    // where the spinner is hidden by default
+    setTimeout(() => {
+      this.formTarget.requestSubmit()
+    }, this.submitDelayMsValue)
   }
 
   showLoading() {
     if (this.hasLoadingTarget) {
       this.loadingTarget.classList.remove("hidden")
-    }
-    if (this.hasStatusTarget) {
-      this.statusTarget.classList.add("hidden")
     }
   }
 

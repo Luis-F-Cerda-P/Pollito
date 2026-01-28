@@ -49,50 +49,67 @@
     <%= hidden_field_tag :match_id, match.id %>
 
     <div class="flex items-center justify-center space-x-4">
-      <% match.match_participants.each_with_index do |mp, i| %>
-        <%
-          # Find existing predicted result for this participant
-          existing_score = nil
-          if prediction && prediction.predicted_results.loaded?
-            pr = prediction.predicted_results.find { |r| r.match_participant_id == mp.id }
-            existing_score = pr&.score
-          elsif prediction
-            pr = prediction.predicted_results.find_by(match_participant_id: mp.id)
-            existing_score = pr&.score
-          end
-        %>
+      <% 2.times do |i| %>
+        <% mp = match.match_participants[i] %>
 
-        <div class="flex-1 text-center">
-          <div class="font-medium text-gray-900 mb-2 truncate" title="<%= mp.participant.name %>">
-            <%= mp.participant.name %>
-          </div>
-          <input type="number"
-                 name="prediction[predicted_results_attributes][<%= i %>][score]"
-                 value="<%= existing_score %>"
-                 min="0"
-                 max="9"
-                 data-prediction-form-target="scoreInput"
-                 data-action="input->prediction-form#onInput"
-                 class="w-16 h-12 text-center text-2xl font-bold border-2 rounded-lg
-                        <%= is_open ? 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500' : 'border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed' %>"
-                 <%= 'disabled' unless is_open %>>
-          <%= hidden_field_tag "prediction[predicted_results_attributes][#{i}][match_participant_id]", mp.id %>
-          <% if prediction && !prediction.new_record? %>
-            <% pr = prediction.predicted_results.find { |r| r.match_participant_id == mp.id } || prediction.predicted_results.find_by(match_participant_id: mp.id) %>
-            <% if pr&.id %>
-              <%= hidden_field_tag "prediction[predicted_results_attributes][#{i}][id]", pr.id %>
+        <% if mp.present? %>
+          <%
+            # Find existing predicted result for this participant
+            existing_score = nil
+            if prediction && prediction.predicted_results.loaded?
+              pr = prediction.predicted_results.find { |r| r.match_participant_id == mp.id }
+              existing_score = pr&.score
+            elsif prediction
+              pr = prediction.predicted_results.find_by(match_participant_id: mp.id)
+              existing_score = pr&.score
+            end
+          %>
+
+          <div class="flex-1 text-center">
+            <div class="font-medium text-gray-900 mb-2 truncate" title="<%= mp.participant.name %>">
+              <%= mp.participant.name %>
+            </div>
+            <input type="number"
+                   name="prediction[predicted_results_attributes][<%= i %>][score]"
+                   value="<%= existing_score %>"
+                   min="0"
+                   max="9"
+                   data-prediction-form-target="scoreInput"
+                   data-action="input->prediction-form#onInput"
+                   class="w-16 h-12 text-center text-2xl font-bold border-2 rounded-lg
+                          <%= is_open ? 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500' : 'border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed' %>"
+                   <%= 'disabled' unless is_open %>>
+            <%= hidden_field_tag "prediction[predicted_results_attributes][#{i}][match_participant_id]", mp.id %>
+            <% if prediction && !prediction.new_record? %>
+              <% pr = prediction.predicted_results.find { |r| r.match_participant_id == mp.id } || prediction.predicted_results.find_by(match_participant_id: mp.id) %>
+              <% if pr&.id %>
+                <%= hidden_field_tag "prediction[predicted_results_attributes][#{i}][id]", pr.id %>
+              <% end %>
             <% end %>
-          <% end %>
-        </div>
+          </div>
+        <% else %>
+          <!-- TBD placeholder for missing participant -->
+          <div class="flex-1 text-center">
+            <div class="font-medium text-gray-400 mb-2">TBD</div>
+            <input type="number"
+                   value=""
+                   min="0"
+                   max="9"
+                   class="w-16 h-12 text-center text-2xl font-bold border-2 rounded-lg border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                   disabled>
+          </div>
+        <% end %>
 
         <% if i == 0 %>
           <span class="text-gray-400 font-medium text-lg">vs</span>
         <% end %>
       <% end %>
     </div>
+  <% end %>
 
-    <!-- Loading spinner (hidden) -->
-    <div data-prediction-form-target="loading" class="hidden mt-3 text-center">
+  <!-- Spinner container (fixed height to prevent layout shift) -->
+  <div class="h-7 mt-2 flex items-center justify-center">
+    <div data-prediction-form-target="loading" class="hidden">
       <span class="inline-flex items-center text-sm text-gray-500">
         <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -101,5 +118,5 @@
         Saving...
       </span>
     </div>
-  <% end %>
+  </div>
 </div>
