@@ -33,17 +33,22 @@
             </div>
           </div>
         <% end %>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <%= form.label :event_id, class: "block text-sm font-medium text-gray-700 mb-2" %>
-            <%= form.select :event_id, 
-                options_from_collection_for_select(@events, :id, :name, @match.event_id),
-                { prompt: "Select an event" },
-                { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
+            <span class="block text-sm font-medium text-gray-700 mb-2">Event</span>
+            <p class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700">
+              <%= @match.event.name %>
+            </p>
+          </div>
+          <div>
+            <span class="block text-sm font-medium text-gray-700 mb-2">Stage</span>
+            <p class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700">
+              <%= @match.stage.name %>
+            </p>
           </div>
           <div>
             <%= form.label :round, class: "block text-sm font-medium text-gray-700 mb-2" %>
-            <%= form.number_field :round, 
+            <%= form.number_field :round,
                 class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
                 placeholder: "Round number (optional)" %>
           </div>

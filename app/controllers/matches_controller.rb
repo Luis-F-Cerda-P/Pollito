@@ -38,7 +38,6 @@ class MatchesController < ApplicationController
   end
 
   def edit
-    @events = Event.all
     @participants = Participant.all
   end
 
@@ -46,7 +45,6 @@ class MatchesController < ApplicationController
     if @match.update(match_params)
       redirect_to @match, notice: "Match was successfully updated."
     else
-      @events = Event.all
       @participants = Participant.all
       render :edit, status: :unprocessable_entity
     end
@@ -68,7 +66,7 @@ class MatchesController < ApplicationController
 
   def match_params
     params.require(:match).permit(
-      :event_id, :match_date, :round,
+      :match_date, :round,
       match_participants_attributes: [
         :id, :participant_id, :_destroy,
         result_attributes: [ :id, :score ]

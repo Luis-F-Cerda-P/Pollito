@@ -21,7 +21,7 @@
         <div class="p-6">
           <!-- Match Participants Display -->
           <div class="mb-6">
-            <% match_completed = @match.match_participants.all? { |mp| mp.result&.final } %>
+            <% match_completed = true %>
             <% if @match.participants.count == 2 %>
               <!-- Two-Participant Layout (side by side) -->
               <div class="flex items-center justify-between">
