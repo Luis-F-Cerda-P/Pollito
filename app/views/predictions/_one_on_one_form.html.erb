@@ -84,25 +84,26 @@
       end
     %>
 
-    <div class="flex items-center justify-center gap-3">
+    <div class="flex items-center justify-between gap-0 sm:gap-2">
       <!-- Team 1: Flag & Name column -->
       <% if participants_data[0] %>
         <% mp = participants_data[0][:mp] %>
-        <div class="flex flex-col items-center w-1/4">
+        <div class="flex flex-col items-center w-18 sm:w-1/4">
           <% if mp.participant.image.attached? %>
-            <%= image_tag mp.participant.image, class: "h-10 object-cover border border-gray-200" %>
+            <%= image_tag mp.participant.image, class: "h-8 sm:h-10 object-cover border border-gray-200" %>
           <% end %>
-          <span class="font-medium text-gray-900 text-md truncate" title="<%= mp.participant.name %>"><%= mp.participant.name %></span>
+          <span class="font-medium text-gray-900 text-xs sm:text-sm text-center leading-tight max-w-full" title="<%= mp.participant.name %>"><%= mp.participant.name %></span>
         </div>
       <% else %>
-        <div class="flex flex-col items-center w-1/4">
-          <div class="h-10 w-14 bg-gray-100 border border-gray-200"></div>
-          <span class="font-medium text-gray-400 text-md">TBD</span>
+        <div class="flex flex-col items-center w-18 sm:w-1/4 shrink-0">
+          <div class="h-8 sm:h-10 w-12 sm:w-14 bg-gray-100 border border-gray-200"></div>
+          <span class="font-medium text-gray-400 text-xs sm:text-sm">TBD</span>
         </div>
       <% end %>
 
-      <!-- Input 1 -->
-      <div class="w-1/4 flex justify-evenly items-center">
+      <!-- Scores section -->
+      <div class="flex-1 flex justify-center items-center gap-2 sm:gap-3">
+        <!-- Input 1 -->
         <% if participants_data[0] %>
           <% mp = participants_data[0][:mp] %>
           <% existing_score = participants_data[0][:existing_score] %>
@@ -114,7 +115,7 @@
                       data-prediction-form-target="scoreInput"
                       data-action="input->prediction-form#onInput"
           class="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
-          w-14 h-14 text-center text-2xl font-bold border-2 rounded-lg
+          w-10 h-10 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-bold border-2 rounded-lg
           <%= is_open ? 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500' : 'border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed' %>"
           <%= 'disabled' unless is_open %>>
           <%= hidden_field_tag "prediction[predicted_results_attributes][0][match_participant_id]", mp.id %>
@@ -126,11 +127,13 @@
           <% end %>
         <% else %>
           <input type="number" value="" min="0" max="9"
-                      class="w-14 h-14 text-center text-xl font-bold border-2 rounded-lg border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                      class="w-10 h-10 sm:w-14 sm:h-14 text-center text-lg sm:text-xl font-bold border-2 rounded-lg border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                       disabled>
         <% end %>
+
         <!-- VS -->
-        <span class="text-gray-400 font-medium text-lg">vs</span>
+        <span class="text-gray-400 font-medium text-sm sm:text-lg shrink-0">vs</span>
+
         <!-- Input 2 -->
         <% if participants_data[1] %>
           <% mp = participants_data[1][:mp] %>
@@ -143,7 +146,7 @@
                       data-prediction-form-target="scoreInput"
                       data-action="input->prediction-form#onInput"
           class="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
-          w-14 h-14 text-center text-2xl font-bold border-2 rounded-lg
+          w-10 h-10 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-bold border-2 rounded-lg
           <%= is_open ? 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500' : 'border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed' %>"
           <%= 'disabled' unless is_open %>>
           <%= hidden_field_tag "prediction[predicted_results_attributes][1][match_participant_id]", mp.id %>
@@ -155,25 +158,24 @@
           <% end %>
         <% else %>
           <input type="number" value="" min="0" max="9"
-                      class="w-14 h-14 text-center text-xl font-bold border-2 rounded-lg border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+                      class="w-10 h-10 sm:w-14 sm:h-14 text-center text-lg sm:text-xl font-bold border-2 rounded-lg border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                       disabled>
         <% end %>
       </div>
 
-
       <!-- Team 2: Flag & Name column -->
       <% if participants_data[1] %>
         <% mp = participants_data[1][:mp] %>
-        <div class="flex flex-col items-center w-1/4">
+        <div class="flex flex-col items-center w-18 sm:w-1/4 shrink-0">
           <% if mp.participant.image.attached? %>
-            <%= image_tag mp.participant.image, class: "h-10 object-cover border border-gray-200" %>
+            <%= image_tag mp.participant.image, class: "h-8 sm:h-10 object-cover border border-gray-200" %>
           <% end %>
-          <span class="font-medium text-gray-900 text-md truncate" title="<%= mp.participant.name %>"><%= mp.participant.name %></span>
+          <span class="font-medium text-gray-900 text-xs sm:text-sm text-center leading-tight max-w-full" title="<%= mp.participant.name %>"><%= mp.participant.name %></span>
         </div>
       <% else %>
-        <div class="flex flex-col items-center w-1/4">
-          <div class="h-10 w-14 bg-gray-100 border border-gray-200"></div>
-          <span class="font-medium text-gray-400 text-md">TBD</span>
+        <div class="flex flex-col items-center w-18 sm:w-1/4 shrink-0">
+          <div class="h-8 sm:h-10 w-12 sm:w-14 bg-gray-100 border border-gray-200"></div>
+          <span class="font-medium text-gray-400 text-xs sm:text-sm">TBD</span>
         </div>
       <% end %>
     </div>
