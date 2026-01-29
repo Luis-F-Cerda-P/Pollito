@@ -2,7 +2,7 @@
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold text-gray-900">Matches</h1>
     <% if Current.user&.admin? %>
-      <%= link_to "New Match", new_match_path, 
+      <%= link_to "New Match", new_match_path,
           class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
     <% end %>
   </div>
@@ -12,10 +12,10 @@
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Participants</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Round</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
@@ -25,41 +25,61 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <%= link_to match.event.name, match.event, class: "text-blue-600 hover:text-blue-800 font-medium text-sm" %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="flex items-center space-x-2">
-                  <span class="font-medium"><%= match.participants.first&.name || "TBD" %></span>
-                  <span class="text-gray-500">vs</span>
-                  <span class="font-medium"><%= match.participants.last&.name || "TBD" %></span>
-                </div>
+              <td class="px-6 py-4">
+                <div class="font-medium text-gray-900"><%= match.display_name.presence || "TBD" %></div>
+                <% if match.round.present? %>
+                  <div class="text-xs text-gray-500">Round <%= match.round %></div>
+                <% end %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                  Not played
-                </span>
+                <% if match.multi_nominee? %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                    Multi-nominee
+                  </span>
+                <% else %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    One-on-one
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% case match.match_status %>
+                <% when "finished" %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Finished
+                  </span>
+                <% when "in_progress" %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    In progress
+                  </span>
+                <% when "bets_open" %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                    Bets open
+                  </span>
+                <% when "bets_closed" %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                    Bets closed
+                  </span>
+                <% else %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    <%= match.match_status&.humanize || "Unset" %>
+                  </span>
+                <% end %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <div><%= match.match_date.strftime("%b %d, %Y") %></div>
                 <div class="text-gray-500"><%= match.match_date.strftime("%H:%M") %></div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <% if match.round.present? %>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Round <%= match.round %>
-                  </span>
-                <% else %>
-                  <span class="text-gray-400">-</span>
-                <% end %>
-              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm">
-                <%= link_to "View", match, 
+                <%= link_to "View", match,
                     class: "text-blue-600 hover:text-blue-900 mr-3" %>
                 <% if Current.user&.admin? %>
-                  <%= link_to "Edit", edit_match_path(match), 
+                  <%= link_to "Edit", edit_match_path(match),
                       class: "text-indigo-600 hover:text-indigo-900 mr-3" %>
-                  <%= link_to "Delete", match, 
-                    data: { 
+                  <%= link_to "Delete", match,
+                    data: {
                       turbo_method: :delete,
-                      turbo_confirm: "Are you sure you want to delete this match?" 
+                      turbo_confirm: "Are you sure you want to delete this match?"
                     },
                     class: "text-red-600 hover:text-red-900" %>
                 <% end %>
@@ -74,7 +94,7 @@
     <div class="text-center py-12">
       <div class="text-gray-500 text-lg mb-4">No matches found</div>
       <% if Current.user&.admin? %>
-        <%= link_to "Create your first match", new_match_path, 
+        <%= link_to "Create your first match", new_match_path,
             class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
       <% end %>
     </div>

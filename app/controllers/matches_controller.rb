@@ -66,7 +66,7 @@ class MatchesController < ApplicationController
 
   def match_params
     params.require(:match).permit(
-      :match_date, :round,
+      :name, :match_date, :round,
       match_participants_attributes: [
         :id, :participant_id, :_destroy,
         result_attributes: [ :id, :score ]
