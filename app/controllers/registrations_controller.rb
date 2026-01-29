@@ -1,4 +1,6 @@
 class RegistrationsController < ApplicationController
+  layout "auth"
+
   allow_unauthenticated_access
   before_action :set_verification, only: %i[verify confirm]
 
