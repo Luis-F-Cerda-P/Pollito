@@ -19,17 +19,14 @@ class Match < ApplicationRecord
   accepts_nested_attributes_for :match_participants, allow_destroy: true
 
   before_validation :assign_lifecycle_status
+  before_save :assign_default_name
 
   scope :by_event, ->(event) { where(event_id: event) }
   scope :bets_open, -> { where(match_status: :bets_open) }
   scope :bets_closed_or_later, -> { where(match_status: [ :bets_closed, :in_progress, :finished ]) }
 
   def display_name
-    if multi_nominee?
-      participants.map(&:name).join(", ")
-    else
-      participants.map(&:name).join(" vs. ")
-    end
+    name.presence || generated_display_name
   end
 
   def outcome
@@ -78,6 +75,20 @@ class Match < ApplicationRecord
   end
 
   private
+
+  def assign_default_name
+    self.name ||= generated_display_name
+  end
+
+  def generated_display_name
+    return nil if participants.empty?
+
+    if multi_nominee?
+      participants.map(&:name).join(", ")
+    else
+      participants.map(&:name).join(" vs. ")
+    end
+  end
 
   def match_started_by_policy?
     match_date && match_date <= Time.current

@@ -65,7 +65,7 @@
                     </div>
                     <% if match_completed %>
                       <div class="text-3xl font-bold text-blue-600">
-                        <%= mp.result.score %>
+                        <%= mp&.result&.score %>
                       </div>
                     <% else %>
                       <span class="text-sm text-gray-500 italic">TBD</span>

@@ -102,6 +102,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_25_000001) do
     t.datetime "match_date"
     t.integer "match_status"
     t.integer "match_type"
+    t.string "name"
     t.integer "round"
     t.bigint "stage_id", null: false
     t.datetime "updated_at", null: false

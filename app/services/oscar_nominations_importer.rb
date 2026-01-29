@@ -135,6 +135,7 @@ class OscarNominationsImporter
     is_new = match.new_record?
 
     match.assign_attributes(
+      name: category[:name],
       match_date: CEREMONY_DATE.to_datetime,
       match_type: :multi_nominee
     )
