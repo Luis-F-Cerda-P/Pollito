@@ -33,19 +33,51 @@
             </div>
           </div>
         <% end %>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <% stages_by_event = @stages.group_by(&:event_id).transform_values { |stages| stages.map { |s| { id: s.id, name: s.name } } } %>
+        <div data-controller="cascading-select"
+             data-cascading-select-options-value="<%= stages_by_event.to_json %>">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label for="event_filter" class="block text-sm font-medium text-gray-700 mb-2">Event</label>
+              <select id="event_filter"
+                      data-cascading-select-target="parent"
+                      data-action="change->cascading-select#filter"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Select an event</option>
+                <% @events.each do |event| %>
+                  <option value="<%= event.id %>"><%= event.name %></option>
+                <% end %>
+              </select>
+            </div>
+            <div>
+              <%= form.label :stage_id, "Stage", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.select :stage_id, [],
+                  { prompt: "Select stage" },
+                  { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+                    data: { cascading_select_target: "child" } } %>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
-            <%= form.label :event_id, class: "block text-sm font-medium text-gray-700 mb-2" %>
-            <%= form.select :event_id, 
-                options_from_collection_for_select(@events, :id, :name, @match.event_id),
-                { prompt: "Select an event" },
+            <%= form.label :match_type, class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.select :match_type,
+                Match.match_types.keys.map { |k| [k.humanize.titleize, k] },
+                { prompt: "Select match type" },
+                { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
+          </div>
+          <div>
+            <%= form.label :match_status, class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.select :match_status,
+                Match.match_statuses.keys.map { |k| [k.humanize.titleize, k] },
+                { include_blank: "Auto (based on rules)" },
                 { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
           </div>
           <div>
             <%= form.label :round, class: "block text-sm font-medium text-gray-700 mb-2" %>
-            <%= form.number_field :round, 
+            <%= form.number_field :round,
                 class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
-                placeholder: "Round number (optional)" %>
+                placeholder: "Round number" %>
           </div>
         </div>
         <div>
