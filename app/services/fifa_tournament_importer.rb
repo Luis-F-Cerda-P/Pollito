@@ -1,3 +1,5 @@
+require "open-uri"
+
 class FifaTournamentImporter
   def initialize(json_data)
     @data = json_data
@@ -8,7 +10,9 @@ class FifaTournamentImporter
       participants_created: 0,
       participants_updated: 0,
       matches_created: 0,
-      matches_updated: 0
+      matches_updated: 0,
+      images_downloaded: 0,
+      images_failed: 0
     }
   end
 
@@ -77,6 +81,11 @@ class FifaTournamentImporter
         @stats[:participants_created] += 1
       else
         @stats[:participants_updated] += 1
+      end
+
+      # Download and attach flag image if URL present and no image attached
+      if team_data[:picture_url].present? && !participant.image.attached?
+        download_and_attach_image(participant, team_data[:picture_url])
       end
     end
   end
@@ -147,13 +156,15 @@ class FifaTournamentImporter
     @data["Results"].each do |match|
       if match["Home"] && match["Home"]["TeamName"]
         teams << {
-          name: match["Home"]["TeamName"].first["Description"]
+          name: match["Home"]["TeamName"].first["Description"],
+          picture_url: match["Home"]["PictureUrl"]
         }
       end
 
       if match["Away"] && match["Away"]["TeamName"]
         teams << {
-          name: match["Away"]["TeamName"].first["Description"]
+          name: match["Away"]["TeamName"].first["Description"],
+          picture_url: match["Away"]["PictureUrl"]
         }
       end
     end
@@ -169,5 +180,33 @@ class FifaTournamentImporter
       match: match,
       participant: participant
     )
+  end
+
+  def download_and_attach_image(participant, template_url)
+    # Transform template URL: replace {format} with 'sq' and {size} with '4'
+    url = template_url.gsub("{format}", "sq").gsub("{size}", "4")
+
+    # Extract filename from URL (e.g., "MEX" -> "MEX.png")
+    country_code = url.split("/").last
+    filename = "#{country_code}.png"
+
+    begin
+      # Read into memory first to avoid "closed stream" errors with Active Storage
+      image_data = URI.open(url).read
+      participant.image.attach(
+        io: StringIO.new(image_data),
+        filename: filename,
+        content_type: "image/png"
+      )
+
+      @stats[:images_downloaded] += 1
+
+      # Rate limiting: sleep 500ms between downloads
+      sleep(0.5)
+    rescue OpenURI::HTTPError, SocketError, Errno::ECONNREFUSED => e
+      Rails.logger.warn("Failed to download flag for #{participant.name}: #{e.message}")
+      @stats[:images_failed] += 1
+      # Continue without image - don't fail the import
+    end
   end
 end
