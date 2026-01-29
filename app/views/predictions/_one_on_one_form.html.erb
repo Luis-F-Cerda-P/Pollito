@@ -22,7 +22,9 @@
 
     <!-- Spinner container (fixed height to prevent layout shift) -->
     <div class="flex h-5 items-center justify-center">
-      <div data-prediction-form-target="loading" class="hidden">
+      <div id="<%= dom_id(match, :prediction_spinner) %>"
+           data-prediction-form-target="loading"
+           class="hidden">
         <span class="inline-flex items-center text-sm text-gray-500">
           <svg class="animate-spin h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -33,7 +35,9 @@
     </div>
 
     <!-- Status badge -->
-    <div data-prediction-form-target="status" class="w-1/4 text-end">
+    <div id="<%= dom_id(match, :prediction_status) %>"
+         data-prediction-form-target="status"
+         class="w-1/4 text-end">
       <% if !is_open %>
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
           <%= match.match_status.humanize %>

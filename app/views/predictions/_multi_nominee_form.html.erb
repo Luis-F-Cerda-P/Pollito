@@ -18,7 +18,8 @@
 
 <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-150"
      data-controller="prediction-form"
-     data-prediction-form-match-status-value="<%= match.match_status %>">
+     data-prediction-form-match-status-value="<%= match.match_status %>"
+     data-prediction-form-match-type-value="multi_nominee">
 
   <!-- Match info header -->
   <div class="flex items-center justify-between mb-3">
@@ -32,8 +33,21 @@
       </div>
     </div>
 
+    <!-- Spinner -->
+    <div id="<%= dom_id(match, :prediction_spinner) %>"
+         data-prediction-form-target="loading"
+         class="hidden">
+      <span class="inline-flex items-center text-sm text-gray-500">
+        <svg class="animate-spin h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </span>
+    </div>
+
     <!-- Status badge -->
-    <div data-prediction-form-target="status">
+    <div id="<%= dom_id(match, :prediction_status) %>"
+         data-prediction-form-target="status">
       <% if !is_open %>
         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
           <%= match.match_status.humanize %>
@@ -99,15 +113,5 @@
       <% end %>
     </div>
 
-    <!-- Loading spinner (hidden) -->
-    <div data-prediction-form-target="loading" class="hidden mt-3 text-center">
-      <span class="inline-flex items-center text-sm text-gray-500">
-        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        Saving...
-      </span>
-    </div>
   <% end %>
 </div>
