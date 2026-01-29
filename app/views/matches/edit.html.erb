@@ -33,7 +33,7 @@
             </div>
           </div>
         <% end %>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div>
             <span class="block text-sm font-medium text-gray-700 mb-2">Event</span>
             <p class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-gray-700">
@@ -50,68 +50,110 @@
             <%= form.label :round, class: "block text-sm font-medium text-gray-700 mb-2" %>
             <%= form.number_field :round,
                 class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
-                placeholder: "Round number (optional)" %>
+                placeholder: "Round number" %>
           </div>
         </div>
-        <div>
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Match Participants</h3>
-          <div id="participants-container" class="space-y-4">
-            <%= form.fields_for :match_participants do |mp_form| %>
-              <div class="participant-row bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div class="flex items-center justify-between">
-                  <div class="flex-1">
-                    <%= mp_form.label :participant_id, "Participant", class: "block text-sm font-medium text-gray-700 mb-2" %>
-                    <%= mp_form.select :participant_id, 
-                          options_from_collection_for_select(@participants, :id, :name, mp_form.object.participant_id),
-                          { prompt: "Select participant" },
-                          { class: "w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
-                  </div>
-                  <div class="ml-4 flex items-center space-x-2">
-                    <% if mp_form.object.persisted? %>
-                      <%= mp_form.check_box :_destroy, class: "h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded" %>
-                      <%= mp_form.label :_destroy, "Remove", class: "text-sm text-gray-700" %>
-                    <% else %>
-                      <button type="button" onclick="this.closest('.participant-row').remove();" 
-                              class="text-red-600 hover:text-red-800 text-sm font-medium">
-                        Remove
-                      </button>
-                    <% end %>
-                  </div>
-                </div>
-                <!-- Score field for each participant -->
-                <%= mp_form.fields_for :result, mp_form.object.result || mp_form.object.build_result do |result_form| %>
-                  <div class="mt-3">
-                    <%= result_form.label :score, "Score (optional)", class: "block text-sm font-medium text-gray-600 mb-1" %>
-                    <%= result_form.number_field :score, 
-                          class: "w-full md:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
-                          placeholder: "Score",
-                          min: 0 %>
-                  </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <%= form.label :match_type, class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.select :match_type,
+                Match.match_types.keys.map { |k| [k.humanize.titleize, k] },
+                {},
+                { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
+          </div>
+          <div>
+            <%= form.label :match_status, class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.select :match_status,
+                Match.match_statuses.keys.map { |k| [k.humanize.titleize, k] },
+                { include_blank: "Auto (based on rules)" },
+                { class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
+          </div>
+        </div>
+        <% if @match.multi_nominee? %>
+          <!-- Multi-nominee: Simple winner selection -->
+          <div>
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Select Winner</h3>
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <label for="winner_participant_id" class="block text-sm font-medium text-gray-700 mb-2">Winner</label>
+              <% current_winner = @match.match_participants.find { |mp| mp.result&.score == 1 } %>
+              <select name="winner_participant_id" id="winner_participant_id"
+                      class="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <option value="">No winner selected</option>
+                <% @match.match_participants.includes(:participant).each do |mp| %>
+                  <option value="<%= mp.id %>" <%= 'selected' if current_winner&.id == mp.id %>>
+                    <%= mp.participant.name %>
+                  </option>
                 <% end %>
-              </div>
-            <% end %>
+              </select>
+              <p class="mt-2 text-sm text-gray-500">
+                Selecting a winner will set their score to 1 and all others to 0.
+              </p>
+            </div>
           </div>
-          <button type="button" onclick="addParticipant()" 
-                  class="mt-4 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
-            <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Add Participant
-          </button>
-        </div>
+        <% else %>
+          <!-- One-on-one: Individual participant scores -->
+          <div>
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Match Participants</h3>
+            <div id="participants-container" class="space-y-4">
+              <%= form.fields_for :match_participants do |mp_form| %>
+                <div class="participant-row bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                      <%= mp_form.label :participant_id, "Participant", class: "block text-sm font-medium text-gray-700 mb-2" %>
+                      <%= mp_form.select :participant_id,
+                            options_from_collection_for_select(@participants, :id, :name, mp_form.object.participant_id),
+                            { prompt: "Select participant" },
+                            { class: "w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" } %>
+                    </div>
+                    <div class="ml-4 flex items-center space-x-2">
+                      <% if mp_form.object.persisted? %>
+                        <%= mp_form.check_box :_destroy, class: "h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded" %>
+                        <%= mp_form.label :_destroy, "Remove", class: "text-sm text-gray-700" %>
+                      <% else %>
+                        <button type="button" onclick="this.closest('.participant-row').remove();"
+                                class="text-red-600 hover:text-red-800 text-sm font-medium">
+                          Remove
+                        </button>
+                      <% end %>
+                    </div>
+                  </div>
+                  <!-- Score field for each participant -->
+                  <%= mp_form.fields_for :result, mp_form.object.result || mp_form.object.build_result do |result_form| %>
+                    <div class="mt-3">
+                      <%= result_form.label :score, "Score (optional)", class: "block text-sm font-medium text-gray-600 mb-1" %>
+                      <%= result_form.number_field :score,
+                            class: "w-full md:w-32 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500",
+                            placeholder: "Score",
+                            min: 0 %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+            <button type="button" onclick="addParticipant()"
+                    class="mt-4 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+              <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Add Participant
+            </button>
+          </div>
+        <% end %>
         <div>
           <%= form.label :match_date, class: "block text-sm font-medium text-gray-700 mb-2" %>
           <%= form.datetime_local_field :match_date, 
               class: "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
         </div>
-        <!-- Store participants data for JavaScript -->
-        <script>
-          const participantsData = [
-            <% @participants.each do |participant| %>
-              { id: <%= participant.id %>, name: "<%= participant.name %>" },
-            <% end %>
-          ];
-        </script>
+        <% if @match.one_on_one? %>
+          <!-- Store participants data for JavaScript (one-on-one only) -->
+          <script>
+            const participantsData = [
+              <% @participants.each do |participant| %>
+                { id: <%= participant.id %>, name: "<%= j(participant.name) %>" },
+              <% end %>
+            ];
+          </script>
+        <% end %>
         <div class="flex justify-end space-x-3">
           <%= link_to "Cancel", @match, 
               class: "bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200" %>
@@ -122,6 +164,7 @@
     </div>
   </div>
 </div>
+<% if @match.one_on_one? %>
 <script>
   function addParticipant() {
     const container = document.getElementById('participants-container');
@@ -164,3 +207,4 @@
     container.insertAdjacentHTML('beforeend', newHtml);
   }
 </script>
+<% end %>

@@ -22,6 +22,7 @@ class MatchesController < ApplicationController
     # Build 2 match participants by default for common case
     2.times { @match.match_participants.build }
     @events = Event.all
+    @stages = Stage.includes(:event).all
     @participants = Participant.all
   end
 
@@ -32,6 +33,7 @@ class MatchesController < ApplicationController
       redirect_to @match, notice: "Match was successfully created."
     else
       @events = Event.all
+      @stages = Stage.includes(:event).all
       @participants = Participant.all
       render :new, status: :unprocessable_entity
     end
@@ -42,6 +44,8 @@ class MatchesController < ApplicationController
   end
 
   def update
+    handle_winner_selection if params[:winner_participant_id].present?
+
     if @match.update(match_params)
       redirect_to @match, notice: "Match was successfully updated."
     else
@@ -66,11 +70,20 @@ class MatchesController < ApplicationController
 
   def match_params
     params.require(:match).permit(
-      :name, :match_date, :round,
+      :name, :match_date, :round, :stage_id, :match_status, :match_type,
       match_participants_attributes: [
         :id, :participant_id, :_destroy,
         result_attributes: [ :id, :score ]
       ]
     )
+  end
+
+  def handle_winner_selection
+    winner_mp_id = params[:winner_participant_id].to_i
+    @match.match_participants.each do |mp|
+      result = mp.result || mp.build_result
+      result.score = (mp.id == winner_mp_id) ? 1 : 0
+      result.save!
+    end
   end
 end
