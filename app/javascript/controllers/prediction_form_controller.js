@@ -4,6 +4,7 @@ export default class extends Controller {
   static targets = ["form", "scoreInput", "loading", "status"]
   static values = {
     matchStatus: String,
+    matchType: { type: String, default: "one_on_one" },
     debounceMs: { type: Number, default: 500 },
     submitDelayMs: { type: Number, default: 750 }
   }
@@ -21,17 +22,24 @@ export default class extends Controller {
   onInput(event) {
     const input = event.target
 
-    // Validate score is 0-9
-    let value = parseInt(input.value, 10)
-    if (isNaN(value) || value < 0) {
-      input.value = ""
-    } else if (value > 9) {
-      input.value = 9
-    }
+    if (this.matchTypeValue === "multi_nominee") {
+      // Update visual highlight immediately
+      this.updateMultiNomineeSelection(input)
+      // Show spinner immediately and submit (no debounce needed for discrete clicks)
+      this.showLoading()
+      this.submit()
+    } else {
+      // Number input - validate score is 0-9
+      let value = parseInt(input.value, 10)
+      if (isNaN(value) || value < 0) {
+        input.value = ""
+      } else if (value > 9) {
+        input.value = 9      }
 
-    // Check if both scores are filled
-    if (this.bothScoresFilled()) {
-      this.debouncedSubmit()
+      // Check if both scores are filled
+      if (this.bothScoresFilled()) {
+        this.submit()
+      }
     }
   }
 
@@ -49,7 +57,7 @@ export default class extends Controller {
 
     this.debounceTimer = setTimeout(() => {
       this.submit()
-    }, this.debounceValue)
+    }, this.debounceMsValue)
   }
 
   submit() {
@@ -96,5 +104,23 @@ export default class extends Controller {
       this.statusTarget.classList.remove("text-green-600", "bg-green-100")
       this.statusTarget.classList.add("text-red-600", "bg-red-100")
     }
+  }
+
+  updateMultiNomineeSelection(selectedInput) {
+    // Find all labels in this form
+    const labels = this.element.querySelectorAll('label')
+
+    labels.forEach(label => {
+      const radio = label.querySelector('input[type="radio"]')
+      if (radio === selectedInput) {
+        // Selected: add highlight
+        label.classList.remove('border-gray-200', 'hover:border-gray-300')
+        label.classList.add('border-indigo-500', 'bg-indigo-50')
+      } else if (radio) {
+        // Not selected: remove highlight
+        label.classList.remove('border-indigo-500', 'bg-indigo-50')
+        label.classList.add('border-gray-200', 'hover:border-gray-300')
+      }
+    })
   }
 }
