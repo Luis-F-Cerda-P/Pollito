@@ -1,5 +1,5 @@
 class OtpSessionsController < ApplicationController
-  allow_unauthenticated_access
+  allow_unauthenticated_access except: %i[ destroy ]
   before_action :set_user_from_session, only: %i[password authenticate]
   before_action :set_verification, only: %i[verify confirm]
 
