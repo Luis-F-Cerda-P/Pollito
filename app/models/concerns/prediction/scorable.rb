@@ -3,10 +3,10 @@ module Prediction::Scorable
 
   # One-on-one scoring
   EXACT_SCORE_POINTS = 2
-  CORRECT_OUTCOME_POINTS = 3
+  CORRECT_OUTCOME_POINTS = 2
 
   # Multi-nominee scoring
-  CORRECT_WINNER_POINTS = 5
+  CORRECT_WINNER_POINTS = 2
 
   def calculate_score!
     return unless match.finished?
@@ -44,15 +44,17 @@ module Prediction::Scorable
   end
 
   def calculate_participant_scores!
-    predicted_results.each do |predicted_result|
+    # Check if all predicted scores match actual results exactly
+    all_scores_correct = predicted_results.all? do |predicted_result|
       actual_result = match.results.find_by(
         match_participant_id: predicted_result.match_participant_id
       )
+      actual_result && predicted_result.score == actual_result.score
+    end
 
-      next unless actual_result && match.finished?
-
-      points = predicted_result.score == actual_result.score ? EXACT_SCORE_POINTS : 0
-      predicted_result.update!(points: points)
+    # Award points only if ALL scores are exactly correct
+    if all_scores_correct && predicted_results.any?
+      predicted_results.first.update!(points: EXACT_SCORE_POINTS)
     end
   end
 
