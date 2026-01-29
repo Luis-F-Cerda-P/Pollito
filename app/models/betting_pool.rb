@@ -17,6 +17,7 @@ class BettingPool < ApplicationRecord
   }
 
   before_validation :generate_invite_code, on: :create
+  before_validation :enforce_privacy_for_non_admins
   after_create :add_creator_to_members
 
   def add_user(user)
@@ -65,6 +66,10 @@ class BettingPool < ApplicationRecord
   end
 
   private
+
+  def enforce_privacy_for_non_admins
+    self.is_public = false unless creator&.admin?
+  end
 
   def generate_invite_code
     self.invite_code ||= self.class.generate_unique_invite_code
