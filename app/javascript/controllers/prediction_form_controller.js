@@ -34,7 +34,13 @@ export default class extends Controller {
       if (isNaN(value) || value < 0) {
         input.value = ""
       } else if (value > 9) {
-        input.value = 9      }
+        input.value = 9
+      }
+
+      // Auto-advance to next input if a digit was entered
+      if (input.value !== "") {
+        this.advanceToNextInput(input)
+      }
 
       // Check if both scores are filled
       if (this.bothScoresFilled()) {
@@ -121,5 +127,19 @@ export default class extends Controller {
         label.classList.add('border-gray-200', 'hover:border-gray-300')
       }
     })
+  }
+
+  advanceToNextInput(currentInput) {
+    // Find all score inputs across the document for cross-form navigation
+    const allScoreInputs = document.querySelectorAll(
+      'input[data-prediction-form-target="scoreInput"]:not([disabled])'
+    )
+    const inputsArray = Array.from(allScoreInputs)
+    const currentIndex = inputsArray.indexOf(currentInput)
+
+    if (currentIndex !== -1 && currentIndex < inputsArray.length - 1) {
+      inputsArray[currentIndex + 1].focus()
+      inputsArray[currentIndex + 1].select()
+    }
   }
 }
