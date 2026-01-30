@@ -27,8 +27,8 @@
       <div class="text-sm text-gray-500">
         <%= match.match_date.strftime("%b %d, %H:%M") %>
         <% if show_stage && match.stage %>
-          <span class="text-gray-400">|</span>
-          <span class="text-gray-600"><%= match.stage.name %></span>
+          <span class="hidden sm:inline text-gray-400">|</span>
+          <span class="hidden sm:inline text-gray-600"><%= match.stage.name %></span>
         <% end %>
       </div>
     </div>
