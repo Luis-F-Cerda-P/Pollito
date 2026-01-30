@@ -38,7 +38,7 @@ export default class extends Controller {
 
       // Check if both scores are filled
       if (this.bothScoresFilled()) {
-        this.submit()
+        this.debouncedSubmit()
       }
     }
   }
@@ -51,6 +51,7 @@ export default class extends Controller {
   }
 
   debouncedSubmit() {
+    this.showLoading()
     if (this.debounceTimer) {
       clearTimeout(this.debounceTimer)
     }
@@ -63,8 +64,6 @@ export default class extends Controller {
   submit() {
     if (!this.hasFormTarget) return
     if (this.matchStatusValue !== "bets_open") return
-
-    this.showLoading()
 
     // Delay submission so spinner is visible for a meaningful duration
     // When Turbo response arrives, it replaces the element with fresh HTML
