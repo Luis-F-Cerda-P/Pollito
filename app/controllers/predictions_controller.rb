@@ -109,6 +109,12 @@ class PredictionsController < ApplicationController
     # Build the appropriate params based on match type
     effective_params = @match.multi_nominee? ? build_multi_nominee_params : prediction_params
 
+    # For existing predictions, inject predicted_result IDs if missing from form
+    # This handles the case where Turbo Stream updates don't refresh the hidden ID fields
+    unless @prediction.new_record?
+      effective_params = inject_predicted_result_ids(effective_params)
+    end
+
     if @prediction.update(effective_params)
       @prediction.reload  # Ensure fresh state with correct IDs for Turbo Stream re-render
 
@@ -155,5 +161,24 @@ class PredictionsController < ApplicationController
     end
 
     base_params
+  end
+
+  def inject_predicted_result_ids(effective_params)
+    return effective_params unless @prediction.predicted_results.any?
+
+    params_hash = effective_params.to_h.deep_dup
+    existing_by_mp_id = @prediction.predicted_results.index_by(&:match_participant_id)
+
+    if params_hash["predicted_results_attributes"].present?
+      params_hash["predicted_results_attributes"].each do |_key, attrs|
+        next if attrs["id"].present?
+
+        mp_id = attrs["match_participant_id"].to_i
+        existing_pr = existing_by_mp_id[mp_id]
+        attrs["id"] = existing_pr.id if existing_pr
+      end
+    end
+
+    params_hash
   end
 end
