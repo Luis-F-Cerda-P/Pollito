@@ -18,17 +18,22 @@ class BettingPoolsController < ApplicationController
       predicted_results: { match_participant: :participant }
     ).order(created_at: :desc).limit(10)
 
-    # Load matches for predictions section, ordered by stage start time
-    @matches_by_stage = @betting_pool.event.matches
-                          .includes(:stage, match_participants: :participant)
-                          .order(:match_date)
-                          .group_by(&:stage)
-                          .sort_by { |stage, _matches| stage.persisted_start_time || Time.at(0) }
-                          .to_h
-
+    # Load matches chronologically
     @matches_chronological = @betting_pool.event.matches
                                .includes(:stage, match_participants: :participant)
                                .order(:match_date)
+
+    # Build stage order map for CSS ordering (stages ordered by their first match)
+    stages_in_order = @matches_chronological.map(&:stage).uniq
+    @stage_order_map = stages_in_order.each_with_index.to_h { |stage, idx| [ stage.id, idx ] }
+
+    # Build match index within each stage (for ordering within a stage)
+    @stage_match_index = {}
+    stage_counters = Hash.new(0)
+    @matches_chronological.each do |match|
+      @stage_match_index[match.id] = stage_counters[match.stage_id]
+      stage_counters[match.stage_id] += 1
+    end
 
     # User's existing predictions indexed by match_id
     if Current.user && @betting_pool.user_in_pool?(Current.user)

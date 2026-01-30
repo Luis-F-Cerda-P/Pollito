@@ -1,100 +1,144 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["byStage", "chronological", "stageTab", "chronoTab", "closedToggle", "matchItem"]
-  static values = {
-    storageKey: { type: String, default: "predictions_view_preference" }
-  }
+  static targets = ["matchContainer", "matchItem", "stageHeader", "stageTab", "chronoTab", "closedToggle", "pendingToggle"]
+  static values = { view: { type: String, default: "byStage" } }
 
   connect() {
     this.loadPreferences()
+    this.applyCurrentView()
   }
 
   loadPreferences() {
-    const stored = localStorage.getItem(this.storageKeyValue)
-    if (stored) {
+    const savedView = localStorage.getItem("predictions_view_preference")
+    if (savedView) {
+      // Handle backward compatibility with old JSON format
       try {
-        const prefs = JSON.parse(stored)
-        if (prefs.view === "chronological") {
-          this.showChronological()
-        } else {
-          this.showByStage()
+        const parsed = JSON.parse(savedView)
+        if (parsed.view) {
+          this.viewValue = parsed.view
+          // Migrate to new format
+          localStorage.setItem("predictions_view_preference", parsed.view)
+          if (parsed.hideClosed !== undefined) {
+            localStorage.setItem("predictions_hide_closed", parsed.hideClosed.toString())
+          }
         }
-        if (prefs.hideClosed && this.hasClosedToggleTarget) {
-          this.closedToggleTarget.checked = true
-          this.applyClosedFilter(true)
-        }
-      } catch (e) {
-        // Invalid stored data, use defaults
+      } catch {
+        // New string format
+        this.viewValue = savedView
       }
     }
-  }
 
-  savePreferences() {
-    const prefs = {
-      view: this.hasByStageTarget && !this.byStageTarget.classList.contains("hidden") ? "byStage" : "chronological",
-      hideClosed: this.hasClosedToggleTarget ? this.closedToggleTarget.checked : false
-    }
-    localStorage.setItem(this.storageKeyValue, JSON.stringify(prefs))
+    const hideClosed = localStorage.getItem("predictions_hide_closed") === "true"
+    if (this.hasClosedToggleTarget) this.closedToggleTarget.checked = hideClosed
+
+    const showPending = localStorage.getItem("predictions_show_pending") === "true"
+    if (this.hasPendingToggleTarget) this.pendingToggleTarget.checked = showPending
   }
 
   showByStage() {
-    if (this.hasByStageTarget) {
-      this.byStageTarget.classList.remove("hidden")
-    }
-    if (this.hasChronologicalTarget) {
-      this.chronologicalTarget.classList.add("hidden")
-    }
-    this.updateTabStyles("byStage")
-    this.savePreferences()
+    this.viewValue = "byStage"
+    localStorage.setItem("predictions_view_preference", "byStage")
+    this.applyCurrentView()
   }
 
   showChronological() {
-    if (this.hasByStageTarget) {
-      this.byStageTarget.classList.add("hidden")
-    }
-    if (this.hasChronologicalTarget) {
-      this.chronologicalTarget.classList.remove("hidden")
-    }
-    this.updateTabStyles("chronological")
-    this.savePreferences()
+    this.viewValue = "chronological"
+    localStorage.setItem("predictions_view_preference", "chronological")
+    this.applyCurrentView()
   }
 
-  updateTabStyles(activeView) {
-    const activeClasses = ["bg-indigo-600", "text-white"]
-    const inactiveClasses = ["bg-gray-200", "text-gray-700"]
+  applyCurrentView() {
+    this.updateTabStyles()
+    this.reorderCards()
+    this.updateStageHeaders()
+    this.applyClosedFilter()
+  }
 
-    if (this.hasStageTabTarget) {
-      if (activeView === "byStage") {
+  reorderCards() {
+    this.matchItemTargets.forEach(item => {
+      if (this.viewValue === "byStage") {
+        // Order by: stage_order * 1000 + stage_match_index
+        const stageOrder = parseInt(item.dataset.stageOrder) || 0
+        const matchIndex = parseInt(item.dataset.stageMatchIndex) || 0
+        item.style.order = stageOrder * 1000 + matchIndex
+      } else {
+        // Order by chronological index
+        item.style.order = parseInt(item.dataset.chronoOrder) || 0
+      }
+    })
+  }
+
+  updateStageHeaders() {
+    this.stageHeaderTargets.forEach(header => {
+      if (this.viewValue === "byStage") {
+        header.classList.remove("hidden")
+      } else {
+        header.classList.add("hidden")
+      }
+    })
+  }
+
+  updateTabStyles() {
+    const activeClasses = ["bg-indigo-600", "text-white"]
+    const inactiveClasses = ["bg-gray-200", "text-gray-700", "hover:bg-gray-300"]
+
+    if (this.hasStageTabTarget && this.hasChronoTabTarget) {
+      if (this.viewValue === "byStage") {
         this.stageTabTarget.classList.remove(...inactiveClasses)
         this.stageTabTarget.classList.add(...activeClasses)
+        this.chronoTabTarget.classList.remove(...activeClasses)
+        this.chronoTabTarget.classList.add(...inactiveClasses)
       } else {
         this.stageTabTarget.classList.remove(...activeClasses)
         this.stageTabTarget.classList.add(...inactiveClasses)
-      }
-    }
-
-    if (this.hasChronoTabTarget) {
-      if (activeView === "chronological") {
         this.chronoTabTarget.classList.remove(...inactiveClasses)
         this.chronoTabTarget.classList.add(...activeClasses)
-      } else {
-        this.chronoTabTarget.classList.remove(...activeClasses)
-        this.chronoTabTarget.classList.add(...inactiveClasses)
       }
     }
   }
 
-  toggleClosed(event) {
-    const hideClosed = event.target.checked
-    this.applyClosedFilter(hideClosed)
-    this.savePreferences()
+  toggleClosed() {
+    const hideClosed = this.closedToggleTarget.checked
+    localStorage.setItem("predictions_hide_closed", hideClosed)
+    this.applyFilters()
   }
 
-  applyClosedFilter(hideClosed) {
+  togglePending() {
+    const showPending = this.pendingToggleTarget.checked
+    localStorage.setItem("predictions_show_pending", showPending)
+    this.applyFilters()
+  }
+
+  applyClosedFilter() {
+    this.applyFilters()
+  }
+
+  applyFilters() {
+    const hideClosed = this.hasClosedToggleTarget && this.closedToggleTarget.checked
+    const showPending = this.hasPendingToggleTarget && this.pendingToggleTarget.checked
+
     this.matchItemTargets.forEach(item => {
-      const isClosed = item.dataset.matchStatus !== "bets_open"
-      if (hideClosed && isClosed) {
+      const status = item.dataset.matchStatus
+      const hasPrediction = item.dataset.hasPrediction === "true"
+
+      // A match is "open" only if status is exactly "bets_open"
+      const isOpen = status === "bets_open"
+
+      // Determine if this item should be hidden
+      let shouldHide = false
+
+      // Hide closed matches filter
+      if (hideClosed && !isOpen) {
+        shouldHide = true
+      }
+
+      // Show only pending filter (hide items that already have predictions)
+      if (showPending && hasPrediction) {
+        shouldHide = true
+      }
+
+      if (shouldHide) {
         item.classList.add("hidden")
       } else {
         item.classList.remove("hidden")

@@ -25,57 +25,68 @@
         </button>
       </div>
 
-      <!-- Filter: checkbox to hide closed matches -->
-      <label class="inline-flex items-center cursor-pointer">
-        <input type="checkbox"
-               data-predictions-list-target="closedToggle"
-               data-action="change->predictions-list#toggleClosed"
-               class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
-        <span class="ml-2 text-sm text-gray-600">Hide closed matches</span>
-      </label>
+      <!-- Filters -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+        <label class="inline-flex items-center cursor-pointer">
+          <input type="checkbox"
+                 data-predictions-list-target="closedToggle"
+                 data-action="change->predictions-list#toggleClosed"
+                 class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
+          <span class="ml-2 text-sm text-gray-600">Hide closed matches</span>
+        </label>
+        <label class="inline-flex items-center cursor-pointer">
+          <input type="checkbox"
+                 data-predictions-list-target="pendingToggle"
+                 data-action="change->predictions-list#togglePending"
+                 class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500">
+          <span class="ml-2 text-sm text-gray-600">Show only pending</span>
+        </label>
+      </div>
     </div>
   </div>
 
   <div class="p-6">
-    <% if @matches_by_stage.any? %>
-      <!-- By Stage view -->
-      <div data-predictions-list-target="byStage">
-        <% @matches_by_stage.each do |stage, matches| %>
-          <section class="mb-8 last:mb-0">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b border-gray-200">
-              <%= stage.name %>
-            </h3>
-            <div class="space-y-4">
-              <% matches.each do |match| %>
-                <div data-predictions-list-target="matchItem" data-match-status="<%= match.match_status %>">
-                  <%= turbo_frame_tag dom_id(match, :prediction) do %>
-                    <%= render "predictions/match_prediction_form",
-                                match: match,
-                                prediction: @user_predictions[match.id],
-                                betting_pool: @betting_pool %>
-                  <% end %>
-                </div>
-              <% end %>
-            </div>
-          </section>
-        <% end %>
-      </div>
+    <% if @matches_chronological.any? %>
+      <!-- Single container with flex ordering -->
+      <div data-predictions-list-target="matchContainer" class="flex flex-col gap-4">
+        <% @matches_chronological.each_with_index do |match, chrono_index| %>
+          <%
+            # Calculate stage order for "By Stage" view
+            stage_order = @stage_order_map[match.stage_id]
+            stage_match_index = @stage_match_index[match.id]
+            prediction = @user_predictions[match.id]
+            has_prediction = prediction.present? && prediction.persisted?
+          %>
+          <div
+            data-predictions-list-target="matchItem"
+            data-match-status="<%= match.match_status %>"
+            data-has-prediction="<%= has_prediction %>"
+            data-chrono-order="<%= chrono_index %>"
+            data-stage-id="<%= match.stage_id %>"
+            data-stage-order="<%= stage_order %>"
+            data-stage-match-index="<%= stage_match_index %>"
+            style="order: <%= chrono_index %>;">
 
-      <!-- Chronological view (hidden by default) -->
-      <div data-predictions-list-target="chronological" class="hidden">
-        <div class="space-y-4">
-          <% @matches_chronological.each do |match| %>
-            <div data-predictions-list-target="matchItem" data-match-status="<%= match.match_status %>">
-              <%= turbo_frame_tag dom_id(match, :prediction_chrono) do %>
-                <%= render "predictions/match_prediction_form",
-                            match: match,
-                            prediction: @user_predictions[match.id],
-                            betting_pool: @betting_pool,
-                            show_stage: true %>
-              <% end %>
-            </div>
-          <% end %>
-        </div>
+            <!-- Stage header (shown only in By Stage view, for first match of each stage) -->
+            <% if stage_match_index == 0 %>
+              <div data-predictions-list-target="stageHeader"
+                   data-stage-id="<%= match.stage_id %>"
+                   class="hidden mb-4">
+                <h3 class="text-lg font-semibold text-gray-800 pb-2 border-b border-gray-200">
+                  <%= match.stage.name %>
+                </h3>
+              </div>
+            <% end %>
+
+            <%= turbo_frame_tag dom_id(match, :prediction) do %>
+              <%= render "predictions/match_prediction_form",
+                          match: match,
+                          prediction: @user_predictions[match.id],
+                          betting_pool: @betting_pool,
+                          show_stage: true %>
+            <% end %>
+          </div>
+        <% end %>
       </div>
     <% else %>
       <div class="text-center py-12">
